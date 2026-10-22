@@ -1,0 +1,87 @@
+// =====================================================================
+// StudyLang - gramática Lark (LALR(1), lexer contextual)
+// Versão com nível de estudante (UNIVERSITY | SECONDARY)
+// =====================================================================
+
+// ---------- Programa ----------
+start: "STUDENT" ID "LEVEL" level decl* plan
+
+level: "UNIVERSITY" -> university
+     | "SECONDARY"  -> secondary
+
+// ---------- Declarações globais ----------
+?decl: uc_decl
+     | resource_decl
+     | var_decl
+
+// CREDITS é sintaticamente opcional; a obrigatoriedade (universitário)
+// ou proibição (secundário) é verificada na gramática de atributos.
+uc_decl: "UC" STRING "{" credits? difficulty "}"
+credits: CREDITS INT
+difficulty: DIFFICULTY INT
+
+resource_decl: "RESOURCE" "TIME" INT "HOURS"
+
+var_decl: "VAR" ID "=" expr
+
+// ---------- Plano e instruções ----------
+plan: "PLAN" block
+block: "{" stmt* "}"
+
+?stmt: var_decl
+     | assign_stmt
+     | study_stmt
+     | if_stmt
+     | foreach_stmt
+
+assign_stmt: ID "=" expr
+
+study_stmt: "STUDY" (STRING | ID) "FOR" expr "HOURS"
+
+// O "dangling else" não existe: os corpos são sempre blocos com chavetas
+if_stmt: "IF" "(" cond ")" block else_part?
+else_part: "ELSE" (if_stmt | block)
+
+foreach_stmt: "FOR" "EACH" ID "IN" "[" string_list "]" block
+string_list: STRING ("," STRING)*
+
+// ---------- Condições: NOT > AND > OR ----------
+?cond: or_cond
+?or_cond: and_cond
+        | or_cond "OR" and_cond   -> or_
+?and_cond: not_cond
+         | and_cond "AND" not_cond -> and_
+?not_cond: "NOT" not_cond          -> not_
+         | expr REL_OP expr        -> compare
+
+// ---------- Expressões: * / > + -  (associativas à esquerda) ----------
+?expr: term
+     | expr "+" term  -> add
+     | expr "-" term  -> sub
+?term: factor
+     | term "*" factor -> mul
+     | term "/" factor -> div
+?factor: "-" factor       -> neg
+       | INT              -> num
+       | ID               -> var
+       | ID "." attr_name -> attr
+       | "(" expr ")"
+
+attr_name: CREDITS | DIFFICULTY
+
+// ---------- Léxico ----------
+// Palavras reservadas (literais entre aspas nas regras) têm prioridade
+// sobre ID e são sensíveis a maiúsculas/minúsculas.
+CREDITS: "CREDITS"
+DIFFICULTY: "DIFFICULTY"
+
+REL_OP: ">=" | "<=" | "==" | "!=" | ">" | "<"
+
+ID: /[a-zA-Z][a-zA-Z0-9_]*/
+STRING: /"[^"]*"/
+INT: /[0-9]+/
+
+COMMENT: /\/\/[^\n]*/
+%import common.WS
+%ignore WS
+%ignore COMMENT
