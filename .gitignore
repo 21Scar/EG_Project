@@ -1,0 +1,10 @@
+# Configurações do VS Code
+.vscode/
+
+# Ficheiros do sistema operativo
+.DS_Store
+Thumbs.db
+
+# Ambientes virtuais do Python / Conda (se aplicável)
+.venv/
+env/
