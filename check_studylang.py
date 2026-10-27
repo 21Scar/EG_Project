@@ -11,6 +11,7 @@ HERE = Path(__file__).parent
 parser = Lark(
     (HERE / "studylang.lark").read_text(encoding="utf-8"),
     parser="lalr",
+    lexer="basic",            # palavras reservadas realmente reservadas (o contextual aceitava VAR STUDY = 1)
     propagate_positions=True,
 )
 
@@ -325,6 +326,10 @@ RESOURCE TIME 12 HOURS                          // ERRO: dois RESOURCE
 PLAN { STUDY "Redes" FOR 0 HOURS }              // ERRO: horas nao positivas
 '''
 
+KEYWORD_AS_NAME = '''STUDENT Rui LEVEL SECONDARY
+PLAN { VAR STUDY = 1 }
+'''   # palavra reservada usada como nome
+
 SYNTAX_ERR = '''STUDENT Rui
 UC "Redes" { CREDITS 3 DIFFICULTY 3 }
 PLAN { }
@@ -335,5 +340,6 @@ if __name__ == "__main__":
                  ("Ex2 - secundário (válido)", EX2_SEC),
                  ("Ex3 - secundário (10 erros semânticos)", EX3_INVALID_SEC),
                  ("Ex4 - universitário (erros de nível)", EX4_INVALID_UNI),
-                 ("Ex5 - erro sintático (falta LEVEL)", SYNTAX_ERR)]:
+                 ("Ex5 - erro sintático (falta LEVEL)", SYNTAX_ERR),
+                 ("Ex6 - erro sintático (palavra reservada como nome)", KEYWORD_AS_NAME)]:
         run(t, s)

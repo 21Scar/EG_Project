@@ -1,5 +1,5 @@
 // =====================================================================
-// StudyLang - gramática Lark (LALR(1), lexer contextual)
+// StudyLang - gramática Lark (LALR(1), lexer basic)
 // Versão com nível de estudante (UNIVERSITY | SECONDARY)
 // =====================================================================
 
@@ -71,7 +71,9 @@ attr_name: CREDITS | DIFFICULTY
 
 // ---------- Léxico ----------
 // Palavras reservadas (literais entre aspas nas regras) têm prioridade
-// sobre ID e são sensíveis a maiúsculas/minúsculas.
+// sobre ID e são sensíveis a maiúsculas/minúsculas. Isto só é verdade com
+// Lark(..., lexer="basic"); com o lexer contextual (por omissão) seriam
+// aceites como ID (ex.: VAR STUDY = 1).
 CREDITS: "CREDITS"
 DIFFICULTY: "DIFFICULTY"
 
