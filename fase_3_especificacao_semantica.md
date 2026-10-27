@@ -1,281 +1,246 @@
-# 3. Especificação Semântica (rascunho)
+# 3. Especificação Semântica
 
-Esta secção identifica as propriedades da *StudyLang* que não podem ser determinadas apenas pela sintaxe e especifica as principais através de uma gramática de atributos.
+Esta secção identifica as propriedades da *StudyLang* que não podem ser determinadas apenas pela sintaxe e especifica-as através de uma gramática de atributos (AG). A AG é avaliada pelo verificador `check_studylang.py`, que percorre a árvore devolvida pelo `Lark` e calcula os atributos descritos abaixo; cada função do verificador corresponde a um grupo de produções (ver 3.6).
 
 ## 3.1. Propriedades Semânticas
 
-| # | Propriedade | Exemplo de violação (Ex. 3) | Atributos envolvidos |
-|---|---|---|---|
-| P1 | Uma UC só pode ser declarada uma vez (pelo nome) | Erro 1 | `env` herdado, `errors` sintetizado |
-| P2 | No máximo uma declaração `RESOURCE TIME` | – | `nres` sintetizado |
-| P3 | Uma UC estudada (`STUDY "nome"`) ou listada num `FOR EACH` tem de estar declarada | Erro 3 | `env` herdado |
-| P4 | Uma variável só pode ser usada/atribuída se estiver declarada e visível (âmbito estático por bloco) | Erros 4 e 6 | `env` herdado |
-| P5 | Não se pode redeclarar um nome no mesmo bloco (shadowing só em blocos internos) | Erro 5 | `env` com níveis de âmbito |
-| P6 | `id.CREDITS` / `id.DIFFICULTY` só são válidos se `id` for iterador de uma UC | Erro 7 | `env` (tipo de cada nome) |
-| P7 | Tipos: expressões são `int`, condições são `bool`; uma UC não pode ser usada como número | – | `type` sintetizado |
-| P8 | Divisão por zero constante é proibida | Erro 8 | `const`, `val` sintetizados |
-| P9 | As horas garantidamente alocadas não podem exceder `RESOURCE TIME` | Erro 2 | `minHours` sintetizado, `limit` |
+| # | Propriedade | Onde é violada nos exemplos |
+|---|---|---|
+| P1 | Uma UC só pode ser declarada uma vez (identificada pelo nome) | Ex. 3, linha 4 |
+| P2 | No máximo uma declaração `RESOURCE TIME` | Ex. 4, linha 1 |
+| P3 | `CREDITS` depende do nível: obrigatório em cada UC de `UNIVERSITY`; proibido em `SECONDARY`, tanto na declaração da UC como em `u.CREDITS` | Ex. 4, linha 2; Ex. 3, linhas 3 e 20 |
+| P4 | Uma UC referida em `STUDY "nome"` ou na lista de um `FOR EACH` tem de estar declarada; `STUDY id` exige que `id` seja o iterador de um `FOR EACH` | Ex. 3, linha 10 |
+| P5 | Um nome usado numa expressão ou atribuído tem de estar declarado e visível (âmbito estático por bloco); a atribuição só é válida sobre uma variável | Ex. 3, linhas 11 e 17 |
+| P6 | Não é permitido redeclarar um nome no mesmo bloco (o *shadowing* em blocos interiores é permitido) | Ex. 3, linha 14 |
+| P7 | Só um iterador tem atributos: `id.CREDITS` / `id.DIFFICULTY` exigem que `id` seja iterador de UC | Ex. 3, linha 22 |
+| P8 | Tipos: as expressões são inteiras; um iterador não pode ser usado como número; as comparações são entre inteiros; as horas são inteiras | (sem exemplo dedicado) |
+| P9 | Divisão por zero constante é proibida | Ex. 3, linha 23 |
+| P10 | As horas de um `STUDY` têm de ser positivas (quando constantes) | Ex. 4, linha 5 |
+| P11 | As horas garantidas pelo plano não podem exceder `RESOURCE TIME` (se existir exatamente um `RESOURCE`) | Ex. 3, linha 8 (12 > 5) |
 
-## 3.2. Modelo de Valores e Ambiente
+Resultado de `python check_studylang.py` sobre os exemplos da secção 1.4:
 
-**Tipos dos nomes** (guardados no ambiente): `uc` (UC declarada por nome), `var` (variável inteira) e `iter` (iterador de `FOR EACH`, que referencia uma UC).
-
-**Ambiente `env`:** pilha de âmbitos; cada âmbito é um conjunto de pares *(nome, tipo)*. Operações:
-
-* `enterScope(env)` – cria um novo âmbito vazio no topo da pilha;
-* `add(env, n, t)` – adiciona *(n, t)* ao âmbito do topo;
-* `lookup(env, n)` – procura *n* do topo para a base e devolve o tipo, ou `⊥` se não existir;
-* `inCurrentScope(env, n)` – verdadeiro se *n* existe no âmbito do topo.
-
-Os nomes de UCs (`STRING`) e de variáveis/iteradores (`ID`) vivem em espaços de nomes separados; para a tabela, escreve-se `uc:"Nome"` para a primeira e `id` para a segunda.
-
-**Valores:** `Expression` tem os atributos `type ∈ {int, err}`, `const` (booleano: valor conhecido estaticamente) e `val` (inteiro, só significativo se `const`).
-
-**Erros:** cada símbolo tem um atributo sintetizado `errors` (lista de mensagens); a lista final do programa é `Program.errors`.
-
-## 3.3. Gramática normalizada para a gramática de atributos
-
-Para evitar o operador `*` (o que complica a definição de atributos), usamos uma forma BNF equivalente à da secção 2.2:
-
-```
-Program   → STUDENT ID Decls Plan
-Decls     → Decl Decls | ε
-Decl      → UC_Decl | Resource_Decl | Var_Decl
-UC_Decl   → UC STRING { CREDITS NUMBER DIFFICULTY NUMBER }
-Resource_Decl → RESOURCE TIME NUMBER HOURS
-Var_Decl  → VAR ID = Expr
-Plan      → PLAN Block
-Block     → { Stmts }
-Stmts     → Stmt Stmts | ε
-Stmt      → Var_Decl | Assign | Study | If | ForEach
-Assign    → ID = Expr
-Study     → STUDY STRING FOR Expr HOURS
-          | STUDY ID FOR Expr HOURS
-If        → IF ( Cond ) Block ElsePart
-ElsePart  → ELSE If | ELSE Block | ε
-ForEach   → FOR EACH ID IN [ StrList ] Block
-StrList   → STRING | STRING , StrList
-Expr      → Expr + Term | Expr - Term | Term
-Term      → Term * Factor | Term / Factor | Factor
-Factor    → - Factor | NUMBER | ID | ID . Attr | ( Expr )
-Cond      → Cond OR AndC | AndC
-AndC      → AndC AND NotC | NotC
-NotC      → NOT NotC | Expr RelOp Expr
+```text
+=== Ex1 - universitário (válido) ===
+OK: sintaxe e semântica válidas
+=== Ex2 - secundário (válido) ===
+OK: sintaxe e semântica válidas
+=== Ex3 - secundário (10 erros semânticos) ===
+  linha 3: UC "Matematica": CREDITS não existe no nível SECONDARY
+  linha 4: UC "Matematica" repetida
+  linha 8: horas garantidas (12) excedem RESOURCE TIME (5)
+  linha 10: UC "Fisica" não declarada
+  linha 11: 'total' não é uma variável declarada
+  linha 14: redeclaração de 'x' no mesmo bloco
+  linha 17: 'y' não declarado
+  linha 20: CREDITS não existe no nível SECONDARY
+  linha 22: 'x' não é iterador de UC (não tem DIFFICULTY)
+  linha 23: divisão por zero
+=== Ex4 - universitário (erros de nível) ===
+  linha 1: mais do que um RESOURCE
+  linha 2: UC "Redes": CREDITS obrigatório no nível UNIVERSITY
+  linha 5: horas têm de ser positivas
+=== Ex5 - erro sintático (falta LEVEL) ===
+ERRO SINTÁTICO (linha 2, col 1): token inesperado
 ```
 
-## 3.4. Atributos
+## 3.2. Modelo de Ambiente
+
+**Tipos dos nomes** guardados no ambiente: `uc` (UC declarada), `var` (variável inteira) e `iter` (iterador de `FOR EACH`, que referencia uma UC). Os nomes de UCs (as *strings*) e os nomes de variáveis/iteradores (os `ID`) vivem em **espaços de nomes separados**: escreve-se `uc:"Nome"` para os primeiros e `id:nome` para os segundos.
+
+**Ambiente `env`:** o nível do estudante (`level ∈ {uni, sec}`) e uma pilha de âmbitos, cada um um conjunto de pares *(chave, tipo)*. Operações:
+
+* `enter(env)` cria um novo âmbito vazio no topo da pilha (herdando os visíveis);
+* `add(env, k, t)` acrescenta *(k, t)* ao âmbito do topo;
+* `lookup(env, k)` procura *k* do topo para a base e devolve o tipo, ou `⊥` se não existir;
+* `inCurrent(env, k)` é verdadeiro se *k* existe no âmbito do topo.
+
+**Valores de expressões:** cada expressão tem os atributos `type ∈ {int, err}`, `const` (booleano: valor conhecido estaticamente) e `val` (inteiro, só significativo se `const`).
+
+## 3.3. Atributos
 
 | Símbolo | Herdados (↓) | Sintetizados (↑) |
 |---|---|---|
-| `Decls`, `Decl` | `env_in` | `env_out`, `errors`, `nres`, `limit` |
-| `Plan`, `Block`, `Stmts`, `Stmt`, `If`, `ElsePart`, `ForEach` | `env_in` | `env_out` (apenas `Stmts`/`Stmt`), `errors`, `minHours` |
-| `Expr`, `Term`, `Factor`, `Cond`, `AndC`, `NotC` | `env` | `type`, `const`, `val`, `errors` |
-| `StrList` | `env` | `errors`, `count` |
-| `Program` | – | `errors` |
+| `start` | – | `errors` |
+| `decl` (`uc_decl`, `resource_decl`, `var_decl`) | `env_in` | `env_out`, `errors`, `nres`, `limit` |
+| `plan`, `block`, `stmt`, `if_stmt`, `else_part`, `foreach_stmt` | `env_in` | `env_out` (só `stmt`), `errors`, `minHours` |
+| `expr`, `cond` e subexpressões | `env` | `type`, `const`, `val`, `errors` |
+| `string_list` | `env` | `errors`, `count` |
 
-`minHours` é um limite inferior do número de horas que o plano aloca com certeza; só conta alocações cujo valor é constante. Deste modo, a verificação P9 nunca produz falsos positivos (se reporta excesso, o excesso existe).
+`level` é herdado da raiz e propagado sem alteração (está dentro de `env`). `minHours` é um **limite inferior** das horas que o plano aloca com certeza: só conta alocações de valor constante, pelo que a verificação P11 nunca produz falsos positivos (se reporta excesso, o excesso existe).
 
-## 3.5. Regras Semânticas
+## 3.4. Regras Semânticas
 
-Notação: `A.x` é o atributo `x` do símbolo `A`; `++` concatena listas; `[]` é a lista vazia; `msg(...)` é uma mensagem de erro.
+Notação: `A.x` é o atributo `x` do símbolo `A`; `++` concatena listas de erros; `[]` é a lista vazia.
 
-### 3.5.1. Programa e declarações
-
-```
-Program → STUDENT ID Decls Plan
-    Decls.env_in  = emptyEnv()                  // um unico ambito global
-    Plan.env_in   = Decls.env_out
-    Program.errors = Decls.errors ++ Plan.errors
-                     ++ (if Decls.nres > 1 then [msg("mais do que um RESOURCE")] else [])
-                     ++ (if Decls.nres == 1 and Plan.minHours > Decls.limit
-                         then [msg("horas excedem RESOURCE TIME")] else [])      // P2, P9
-
-Decls → Decl Decls1
-    Decl.env_in   = Decls.env_in
-    Decls1.env_in = Decl.env_out
-    Decls.env_out = Decls1.env_out
-    Decls.errors  = Decl.errors ++ Decls1.errors
-    Decls.nres    = Decl.nres + Decls1.nres
-    Decls.limit   = Decl.limit + Decls1.limit   // so e relevante quando nres == 1
-
-Decls → ε
-    Decls.env_out = Decls.env_in
-    Decls.errors  = []   Decls.nres = 0   Decls.limit = 0
-
-Decl → UC_Decl | Resource_Decl | Var_Decl        // regra de copia
-    (os atributos de Decl sao os do filho; o filho recebe Decl.env_in)
-
-UC_Decl → UC STRING { CREDITS NUMBER1 DIFFICULTY NUMBER2 }
-    UC_Decl.errors  = if lookup(env_in, uc:STRING.lexeme) ≠ ⊥
-                      then [msg("UC repetida")] else []                           // P1
-    UC_Decl.env_out = add(env_in, uc:STRING.lexeme, uc)
-    UC_Decl.nres = 0   UC_Decl.limit = 0
-
-Resource_Decl → RESOURCE TIME NUMBER HOURS
-    Resource_Decl.env_out = Resource_Decl.env_in
-    Resource_Decl.errors  = []
-    Resource_Decl.nres    = 1
-    Resource_Decl.limit   = NUMBER.val
-
-Var_Decl → VAR ID = Expr
-    Expr.env = Var_Decl.env_in
-    Var_Decl.errors = Expr.errors
-        ++ (if inCurrentScope(env_in, ID.lexeme) then [msg("redeclaracao")] else [])  // P5
-        ++ (if Expr.type ≠ int then [msg("tipo")] else [])                            // P7
-    Var_Decl.env_out = add(env_in, ID.lexeme, var)
-    Var_Decl.nres = 0   Var_Decl.limit = 0
-```
-
-### 3.5.2. Blocos e instruções
+### 3.4.1. Programa e declarações
 
 ```
-Plan → PLAN Block
-    Block.env_in = Plan.env_in
-    Plan.errors = Block.errors      Plan.minHours = Block.minHours
+start → STUDENT ID LEVEL level decl* plan
+    env_0        = emptyEnv(level.kind)               // level.kind = uni | sec
+    decl_i.env_in = decl_{i-1}.env_out                 // encadeamento da esquerda para a direita
+    plan.env_in  = decl_n.env_out
+    nres         = Σ decl_i.nres      limit = limit do último RESOURCE
+    start.errors = ⋃ decl_i.errors ++ plan.errors
+        ++ (if nres > 1 then [erro "mais do que um RESOURCE"])                          // P2
+        ++ (if nres == 1 and plan.minHours > limit then [erro "horas garantidas excedem RESOURCE TIME"])  // P11
 
-Block → { Stmts }
-    Stmts.env_in = enterScope(Block.env_in)       // novo ambito; env_out de Stmts e descartado
-    Block.errors = Stmts.errors     Block.minHours = Stmts.minHours
+uc_decl → UC STRING { credits? difficulty }
+    uc_decl.errors =
+          (if lookup(env_in, uc:STRING) ≠ ⊥ then [erro "UC repetida"])                 // P1
+       ++ (if level == uni and credits ausente  then [erro "CREDITS obrigatório"])     // P3
+       ++ (if level == sec and credits presente then [erro "CREDITS não existe"])      // P3
+    uc_decl.env_out = add(env_in, uc:STRING, uc)
 
-Stmts → Stmt Stmts1
-    Stmt.env_in   = Stmts.env_in
-    Stmts1.env_in = Stmt.env_out                  // a declaracao em Stmt fica visivel a seguir
-    Stmts.errors   = Stmt.errors ++ Stmts1.errors
-    Stmts.minHours = Stmt.minHours + Stmts1.minHours
+resource_decl → RESOURCE TIME INT HOURS
+    resource_decl.env_out = env_in
+    resource_decl.nres = 1       resource_decl.limit = INT.val
 
-Stmts → ε
-    Stmts.errors = []    Stmts.minHours = 0
-
-Stmt → Var_Decl
-    Var_Decl.env_in = Stmt.env_in    Stmt.env_out = Var_Decl.env_out
-    Stmt.errors = Var_Decl.errors    Stmt.minHours = 0
-
-Stmt → Assign | Study | If | ForEach        // as restantes alternativas
-    X.env_in = Stmt.env_in           Stmt.env_out = Stmt.env_in         // nao declaram nomes
-    Stmt.errors = X.errors           Stmt.minHours = X.minHours
-
-Assign → ID = Expr
-    Expr.env = Assign.env_in
-    Assign.errors = Expr.errors
-        ++ (if lookup(env_in, ID.lexeme) ≠ var then [msg("variavel nao declarada")] else [])  // P4
-        ++ (if Expr.type ≠ int then [msg("tipo")] else [])                                    // P7
-    Assign.minHours = 0
-
-Study → STUDY STRING FOR Expr HOURS
-    Expr.env = Study.env_in
-    Study.errors = Expr.errors
-        ++ (if lookup(env_in, uc:STRING.lexeme) ≠ uc then [msg("UC nao declarada")] else [])  // P3
-        ++ (if Expr.type ≠ int then [msg("tipo")] else [])
-    Study.minHours = if Expr.const then Expr.val else 0
-
-Study → STUDY ID FOR Expr HOURS
-    Expr.env = Study.env_in
-    Study.errors = Expr.errors
-        ++ (if lookup(env_in, ID.lexeme) ≠ iter then [msg("ID nao e iterador de UC")] else [])  // P4/P6
-        ++ (if Expr.type ≠ int then [msg("tipo")] else [])
-    Study.minHours = if Expr.const then Expr.val else 0
+var_decl → VAR ID = expr
+    expr.env = var_decl.env_in
+    var_decl.errors = expr.errors
+        ++ (if inCurrent(env_in, id:ID) then [erro "redeclaração"])                   // P6
+        ++ (if expr.type ≠ int and expr.errors == [] then [erro "tipo"])              // P8
+    var_decl.env_out = add(env_in, id:ID, var)
 ```
 
-### 3.5.3. Controlo de fluxo
+### 3.4.2. Blocos e instruções
 
 ```
-If → IF ( Cond ) Block ElsePart
-    Cond.env = If.env_in
-    Block.env_in = If.env_in        ElsePart.env_in = If.env_in
-    If.errors = Cond.errors ++ Block.errors ++ ElsePart.errors
-    If.minHours = min(Block.minHours, ElsePart.minHours)     // ramo mais pobre (garantido)
+plan → PLAN block
+    block.env_in = plan.env_in
+    plan.errors  = block.errors       plan.minHours = block.minHours
 
-ElsePart → ELSE If       // ElsePart.errors e minHours = os de If, If.env_in = ElsePart.env_in
-ElsePart → ELSE Block    // idem com Block
-ElsePart → ε
-    ElsePart.errors = []     ElsePart.minHours = 0           // sem ELSE, nenhuma hora garantida
+block → { stmt* }
+    stmt_1.env_in = enter(block.env_in)               // novo âmbito; o env_out do último stmt é descartado
+    stmt_i.env_in = stmt_{i-1}.env_out
+    block.errors   = ⋃ stmt_i.errors
+    block.minHours = Σ stmt_i.minHours
 
-ForEach → FOR EACH ID IN [ StrList ] Block
-    StrList.env = ForEach.env_in
-    Block.env_in = add(enterScope(ForEach.env_in), ID.lexeme, iter)   // iterador local ao ciclo
-    ForEach.errors = StrList.errors ++ Block.errors
-    ForEach.minHours = StrList.count * Block.minHours
+stmt → var_decl
+    stmt.env_out = var_decl.env_out       stmt.minHours = 0      // a declaração fica visível nas instruções seguintes
+stmt → assign_stmt | study_stmt | if_stmt | foreach_stmt
+    stmt.env_out = stmt.env_in            // estas instruções não declaram nomes no bloco
 
-StrList → STRING
-    StrList.count = 1
-    StrList.errors = (if lookup(env, uc:STRING.lexeme) ≠ uc then [msg("UC nao declarada")] else [])  // P3
-StrList → STRING , StrList1
-    StrList1.env = StrList.env
-    StrList.count = 1 + StrList1.count
-    StrList.errors = StrList1.errors
-        ++ (if lookup(env, uc:STRING.lexeme) ≠ uc then [msg("UC nao declarada")] else [])
+assign_stmt → ID = expr
+    expr.env = env_in
+    assign_stmt.errors = expr.errors
+        ++ (if lookup(env_in, id:ID) ≠ var then [erro "não é uma variável declarada"])  // P5
+        ++ (if expr.type ≠ int and expr.errors == [] then [erro "tipo"])                // P8
+    assign_stmt.minHours = 0
+
+study_stmt → STUDY STRING FOR expr HOURS
+    expr.env = env_in
+    study_stmt.errors = expr.errors
+        ++ (if expr.type ≠ int and expr.errors == [] then [erro "horas têm de ser inteiras"])       // P8
+        ++ (if expr.const and expr.val ≤ 0 then [erro "horas têm de ser positivas"])                // P10
+        ++ (if lookup(env_in, uc:STRING) ≠ uc then [erro "UC não declarada"])                       // P4
+    study_stmt.minHours = (expr.val if expr.const and expr.val > 0 else 0)
+
+study_stmt → STUDY ID FOR expr HOURS
+    (igual, mas a verificação P4 é: lookup(env_in, id:ID) ≠ iter → erro "não é iterador de UC")
 ```
 
-> Nota: como o `Block` de um `ForEach` não sabe qual a UC concreta em cada iteração, as expressões que usam `u.CREDITS` ou `u.DIFFICULTY` têm `const = false` e contribuem com 0 para `minHours` (ver 3.5.4). O limite continua a ser um limite inferior válido. Uma extensão possível é avaliar o corpo uma vez por UC da lista, com o iterador ligado aos atributos concretos.
-
-### 3.5.4. Expressões e condições
+### 3.4.3. Controlo de fluxo
 
 ```
-Expr → Expr1 + Term | Expr1 - Term
-    Expr1.env = Expr.env     Term.env = Expr.env
-    Expr.type  = if Expr1.type == int and Term.type == int then int else err
-    Expr.const = Expr1.const and Term.const
-    Expr.val   = Expr1.val (+|-) Term.val            // so significativo se const
-    Expr.errors = Expr1.errors ++ Term.errors
-Expr → Term                                           // regra de copia
+if_stmt → IF ( cond ) block else_part?
+    cond.env = env_in      block.env_in = env_in      else_part.env_in = env_in
+    if_stmt.errors   = cond.errors ++ block.errors ++ else_part.errors
+    if_stmt.minHours = min(block.minHours, else_part.minHours)   // sem ELSE: else_part.minHours = 0
 
-Term → Term1 * Factor
-    (analogo a + e -)
-Term → Term1 / Factor
-    Term.type  = if Term1.type == int and Factor.type == int then int else err
-    Term.const = Term1.const and Factor.const and Factor.val ≠ 0
-    Term.val   = Term1.val / Factor.val                // divisao inteira
-    Term.errors = Term1.errors ++ Factor.errors
-        ++ (if Factor.const and Factor.val == 0 then [msg("divisao por zero")] else [])       // P8
-Term → Factor                                          // regra de copia
+else_part → ELSE if_stmt | ELSE block
+    else_part.errors / minHours = os do filho
 
-Factor → NUMBER
-    Factor.type = int    Factor.const = true    Factor.val = NUMBER.val    Factor.errors = []
+foreach_stmt → FOR EACH ID IN [ string_list ] block
+    string_list.env = env_in
+    block.env_in    = add(enter(env_in), id:ID, iter)           // o iterador só existe no corpo do ciclo
+    foreach_stmt.errors   = string_list.errors ++ block.errors
+    foreach_stmt.minHours = string_list.count * block.minHours
 
-Factor → ID
-    Factor.const = false
-    Factor.type  = if lookup(env, ID.lexeme) == var then int else err
-    Factor.errors = (if lookup(env, ID.lexeme) == ⊥ then [msg("nao declarado")]             // P4
-                     else if lookup(env, ID.lexeme) ≠ var then [msg("nao e numerico")] else [])  // P7
-
-Factor → ID . Attr
-    Factor.const = false
-    Factor.type  = if lookup(env, ID.lexeme) == iter then int else err
-    Factor.errors = (if lookup(env, ID.lexeme) ≠ iter then [msg("so iteradores tem atributos")] else [])  // P6
-
-Factor → - Factor1
-    Factor.type = Factor1.type    Factor.const = Factor1.const    Factor.val = -Factor1.val
-Factor → ( Expr )                                      // regra de copia
-
-NotC → Expr1 RelOp Expr2
-    NotC.type = bool
-    NotC.errors = Expr1.errors ++ Expr2.errors
-        ++ (if Expr1.type ≠ int or Expr2.type ≠ int then [msg("tipo")] else [])
-NotC → NOT NotC1                                       // propagar errors; type = bool
-AndC, Cond                                             // concatenar errors dos filhos; type = bool
+string_list → STRING (, STRING)*
+    string_list.count  = número de STRING
+    string_list.errors = ⋃ (if lookup(env, uc:STRING_i) ≠ uc then [erro "UC não declarada"])    // P4
 ```
 
-## 3.6. Dependências e Avaliação
+> Dentro de um ciclo, as expressões que usam `u.CREDITS` ou `u.DIFFICULTY` têm `const = false` (o valor depende da UC em cada iteração) e contribuem com 0 para `minHours`. O limite continua a ser um limite inferior válido. Uma extensão possível é avaliar o corpo uma vez por UC da lista, com o iterador ligado aos atributos concretos.
 
-* **Atributos herdados:** `env_in` (e `env` nas expressões) fluem de cima para baixo e da esquerda para a direita (o `env_out` de uma declaração é o `env_in` da seguinte): é uma dependência *L-atribuída*.
-* **Atributos sintetizados:** `type`, `const`, `val`, `errors`, `minHours`, `count`, `nres`, `limit` e `env_out` fluem das folhas para a raiz.
-* **Ordem de avaliação:** como todas as dependências respeitam o sentido da árvore (herdados só dependem do pai e dos irmãos à esquerda; sintetizados dependem dos filhos), a gramática é **L-atribuída**, o que permite avaliar todos os atributos numa única passagem em profundidade (da esquerda para a direita), podendo ser integrada diretamente num analisador descendente. O grafo de dependências é acíclico.
+### 3.4.4. Expressões e condições
 
-### Exemplo de avaliação (Exemplo 3, `STUDY "Fisica" FOR 2 HOURS`)
+```
+expr → INT
+    type = int     const = true      val = INT.val
 
-1. `Decls.env_out` contém `uc:"Matematica"` (a segunda declaração gera erro P1 mas não altera o ambiente).
-2. `Plan.env_in = Decls.env_out`; `Block.env_in` idêntico; `Stmts.env_in = enterScope(...)`.
-3. `Study.env_in` contém apenas `uc:"Matematica"`; `lookup(env_in, uc:"Fisica") = ⊥` ⇒ `Study.errors = [ "UC nao declarada" ]`.
-4. `Expr.const = true`, `Expr.val = 2` ⇒ `Study.minHours = 2`, que se soma aos 10 do primeiro `STUDY`; em `Program`, `12 > 5` ⇒ erro P9.
+expr → ID                                                              // factor "var"
+    const = false
+    type  = int if lookup(env, id:ID) == var else err
+    errors = (if lookup == ⊥ then [erro "não declarado"]               // P5
+              else if lookup ≠ var then [erro "não é numérico"])       // P8
+
+expr → ID . attr_name                                                  // factor "attr"
+    const = false
+    errors = (if lookup(env, id:ID) ≠ iter then [erro "não é iterador de UC"]                   // P7
+              else if attr_name == CREDITS and level == sec then [erro "CREDITS não existe"])   // P3
+    type = int if errors == [] else err
+
+expr → - expr1
+    type, const = os de expr1      val = -expr1.val
+
+expr → expr1 (+ | - | *) expr2
+    type   = int if expr1.type == int and expr2.type == int else err
+    const  = expr1.const and expr2.const
+    val    = expr1.val (op) expr2.val                  // só se const
+    errors = expr1.errors ++ expr2.errors
+
+expr → expr1 / expr2
+    (igual às anteriores, com const = expr1.const and expr2.const and expr2.val ≠ 0
+     e, em errors, + (if expr2.const and expr2.val == 0 then [erro "divisão por zero"]))       // P9
+
+cond → expr1 REL_OP expr2                              // "compare"
+    cond.errors = expr1.errors ++ expr2.errors
+        ++ (if expr1.type ≠ int or expr2.type ≠ int then [erro "comparação exige inteiros"])  // P8
+cond → cond1 OR cond2 | cond1 AND cond2 | NOT cond1
+    cond.errors = concatenação dos errors dos filhos
+```
+
+## 3.5. Dependências e Ordem de Avaliação
+
+* **Herdados:** `env_in` (e `env` nas expressões) fluem de cima para baixo e da esquerda para a direita: o `env_out` de uma declaração ou instrução é o `env_in` da seguinte, e o do `foreach_stmt` é construído a partir do do pai.
+* **Sintetizados:** `type`, `const`, `val`, `errors`, `minHours`, `count`, `nres`, `limit` e `env_out` fluem das folhas para a raiz.
+* **L-atribuída:** os atributos herdados de um símbolo dependem apenas do pai e dos irmãos à sua esquerda; os sintetizados, só dos filhos. O grafo de dependências é acíclico, e todos os atributos podem ser avaliados numa única passagem em profundidade, da esquerda para a direita, que é o que o verificador faz.
+
+### Exemplo de avaliação (Ex. 3, linhas 8 e 10)
+
+1. `start` cria `env_0` com `level = sec`. A primeira `uc_decl` ("Matematica", com `CREDITS`) gera o erro P3 (`CREDITS` no secundário), mas acrescenta `uc:"Matematica"` ao ambiente; a segunda gera P1 (UC repetida).
+2. `plan.env_in = decl_n.env_out`; `block` cria um âmbito novo com `enter`.
+3. `STUDY "Matematica" FOR 10 HOURS`: `lookup(env_in, uc:"Matematica") == uc` (sem erro); `expr.const = true`, `expr.val = 10` ⇒ `minHours = 10`.
+4. `STUDY "Fisica" FOR 2 HOURS`: `lookup(env_in, uc:"Fisica") == ⊥` ⇒ erro P4; `minHours = 2`.
+5. `block.minHours = 10 + 2 = 12`; em `start`, `nres == 1` e `12 > limit = 5` ⇒ erro P11 ("horas garantidas (12) excedem RESOURCE TIME (5)").
+
+## 3.6. Correspondência com o Código
+
+| Parte da AG | Função em `check_studylang.py` |
+|---|---|
+| `start`, declarações globais, P1/P2/P3/P11 | `check()` |
+| `var_decl` | `var_decl()` |
+| `block`, `stmt` | `block()`, `stmt()` |
+| `if_stmt`, `else_part` | `if_stmt()` |
+| `foreach_stmt`, `string_list` | `foreach()` |
+| horas de um `STUDY` (P8, P10) | `check_hours()` |
+| `expr` (tipos, `const`, `val`, P5, P7, P9) | `expr()` |
+| `cond` | `cond()` |
+| ambiente | classe `Env` |
+
+O verificador não usa uma ferramenta de AG (como o `LarkAG`): as regras são avaliadas por funções recursivas que devolvem os atributos sintetizados e recebem o ambiente como argumento. Isto corresponde diretamente à AG acima, por ser L-atribuída.
 
 ## 3.7. Qualidade da Linguagem e da Gramática (rascunho)
 
 | Propriedade | Avaliação |
 |---|---|
-| **Adequação ao domínio** | As construções (`UC`, `RESOURCE`, `PLAN`, `STUDY`, `FOR EACH`) correspondem diretamente aos conceitos do estudante; não é uma linguagem imperativa genérica. |
-| **Legibilidade / expressividade** | Palavras-chave em inglês próximas da linguagem natural (`STUDY "X" FOR 8 HOURS`). Limite: só inteiros, só UCs listadas por nome. |
-| **Ausência de ambiguidade** | Sem *dangling else* (blocos com chavetas); precedência e associatividade codificadas na própria gramática. |
-| **Determinismo / analisabilidade** | Adequada a análise LL com 1 token de lookahead (com a fatorização `ID ("." Attr)?`). |
-| **Minimalidade** | Sem produções inúteis ou inalcançáveis; `<Declaration>*` vs `<Statement>*` mantêm-se separados porque `RESOURCE` e `UC` só fazem sentido no âmbito global. |
-| **Modularidade da gramática** | Expressões, condições, declarações e instruções ficam em grupos independentes, reutilizáveis. |
-| **Limitações assumidas** | `minHours` é só um limite inferior; não existe verificação de pré-requisitos entre UCs nem tipos além de `int`/`bool`/`uc`. |
+| **Adequação ao domínio** | As construções (`UC`, `RESOURCE`, `PLAN`, `STUDY`, `FOR EACH`, `LEVEL`) correspondem diretamente a conceitos do planeamento de estudo; não é uma linguagem imperativa genérica. |
+| **Legibilidade** | Palavras-chave em inglês próximas da linguagem natural (`STUDY "X" FOR 8 HOURS`); a estrutura em blocos e a identação são claras. |
+| **Ausência de ambiguidade** | Gramática LALR(1) sem conflitos; sem *dangling else*; precedência e associatividade codificadas na própria gramática. |
+| **Separação sintaxe/semântica** | Uma só gramática para os dois níveis; as regras que dependem do nível (`CREDITS`) estão na AG, que conhece o `level`. |
+| **Minimalidade** | Sem produções inúteis; um só mecanismo de repetição (`FOR EACH`) e um de ramificação (`IF`), suficientes para o domínio. |
+| **Verificabilidade** | Erros semânticos localizados (linha e mensagem) e testados em cinco exemplos, incluindo erros sintáticos. |
+| **Limitações assumidas** | `minHours` é só um limite inferior (valores que dependem de `u.CREDITS` ou `u.DIFFICULTY` não contam); só existem inteiros; não há limite diário de horas nem pré-requisitos entre UCs; `STUDY` por nome só aceita *strings* literais; as condições não aceitam parênteses de agrupamento. |
