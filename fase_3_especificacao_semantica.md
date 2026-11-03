@@ -232,15 +232,3 @@ cond → cond1 OR cond2 | cond1 AND cond2 | NOT cond1
 | ambiente | classe `Env` |
 
 O verificador não usa uma ferramenta de AG (como o `LarkAG`): as regras são avaliadas por funções recursivas que devolvem os atributos sintetizados e recebem o ambiente como argumento. Isto corresponde diretamente à AG acima, por ser L-atribuída.
-
-## 3.7. Qualidade da Linguagem e da Gramática (rascunho)
-
-| Propriedade | Avaliação |
-|---|---|
-| **Adequação ao domínio** | As construções (`UC`, `RESOURCE`, `PLAN`, `STUDY`, `FOR EACH`, `LEVEL`) correspondem diretamente a conceitos do planeamento de estudo; não é uma linguagem imperativa genérica. |
-| **Legibilidade** | Palavras-chave em inglês próximas da linguagem natural (`STUDY "X" FOR 8 HOURS`); a estrutura em blocos e a identação são claras. |
-| **Ausência de ambiguidade** | Gramática LALR(1) sem conflitos; sem *dangling else*; precedência e associatividade codificadas na própria gramática. |
-| **Separação sintaxe/semântica** | Uma só gramática para os dois níveis; as regras que dependem do nível (`CREDITS`) estão na AG, que conhece o `level`. |
-| **Minimalidade** | Sem produções inúteis; um só mecanismo de repetição (`FOR EACH`) e um de ramificação (`IF`), suficientes para o domínio. |
-| **Verificabilidade** | Erros semânticos localizados (linha e mensagem) e testados em cinco exemplos, incluindo erros sintáticos. |
-| **Limitações assumidas** | `minHours` é só um limite inferior (valores que dependem de `u.CREDITS` ou `u.DIFFICULTY` não contam); só existem inteiros; não há limite diário de horas nem pré-requisitos entre UCs; `STUDY` por nome só aceita *strings* literais; as condições não aceitam parênteses de agrupamento. |
