@@ -50,9 +50,9 @@ As métricas foram calculadas com o script `metricas.py`, baseado no código do 
 
 | Métrica | Valor |
 |---|---|
-| Atributos (herdados / sintetizados) | 11 (2 / 9) |
+| Atributos (herdados / sintetizados) | 13 (4 / 9) |
 | Condições de contexto | 20 |
-| Atributos atómicos / estruturados | 7 / 4 |
+| Atributos atómicos / estruturados | 9 / 4 |
 
 **Complexidade dos atributos.** A maioria dos atributos é atómica (números ou booleanos). Os estruturados são o ambiente (`env`), que é uma pilha de âmbitos, e a lista de mensagens de erro (`errors`). O ambiente é o atributo mais complexo, mas concentra num só sítio toda a informação sobre os nomes declarados (UCs, variáveis e iteradores) e os âmbitos onde são visíveis.
 
@@ -60,7 +60,7 @@ As métricas foram calculadas com o script `metricas.py`, baseado no código do 
 
 **Esquema de restrições.** As 20 condições de contexto não interrompem a análise: cada erro é acrescentado à lista `errors`. Isto permite ao utilizador ver todos os erros de uma só vez.
 
-**Clareza dos nomes.** A maioria dos nomes vem dos conceitos que representam (`errors`, `minHours`, `limit`). Alguns são abreviaturas, como `env` (ambiente) e `nres` (número de declarações `RESOURCE`).
+**Clareza dos nomes.** A maioria dos nomes vem dos conceitos que representam (`errors`, `minHours`, `limit`). Alguns são abreviaturas, como `env` (ambiente) e `nres_in` / `nres_out` (número de declarações `RESOURCE` já vistas antes e depois de cada declaração).
 
 ## 4.4. Limitações e Melhorias Propostas
 
@@ -93,8 +93,6 @@ Isto acontece porque uma variável tem sempre `const = false`, ou seja, o verifi
 | Só existem números inteiros | Acrescentar números decimais (por exemplo `1.5 HOURS`) |
 | Não há limite diário de horas (por exemplo, 24 h por dia) | Acrescentar a noção de dias ao plano e uma condição de contexto para o limite |
 | É preciso repetir os nomes das UCs em cada `FOR EACH` | Permitir iterar sobre todas as UCs declaradas |
-| O erro de `RESOURCE` duplicado aparece na linha 1 | Indicar a linha do segundo `RESOURCE` |
-
 ## 4.5. Síntese
 
 Em resumo, a StudyLang é adequada ao domínio do planeamento de estudo: as suas construções (`UC`, `STUDY … FOR … HOURS`, `RESOURCE TIME`, `LEVEL`) correspondem diretamente aos conceitos do estudante, e a linguagem tem uma só forma de repetir e de decidir, o que a torna fácil de aprender.

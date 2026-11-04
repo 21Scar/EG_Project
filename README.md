@@ -48,9 +48,11 @@ PLAN {
 |---|---|
 | [fase_1_desenho_da_linguagem.md](fase_1_desenho_da_linguagem.md) | Tarefa 1: domínio, propósito, conceitos e exemplos de programas |
 | [fase_2_especifica_o_lexical_e_sint_tica.md](fase_2_especifica_o_lexical_e_sint_tica.md) | Tarefa 2: léxico, gramática em EBNF e decisões de desenho |
-| [fase_3_especificacao_semantica.md](fase_3_especificacao_semantica.md) | Tarefas 3 e 4: propriedades semânticas, gramática de atributos e qualidade |
+| [fase_3_especificacao_semantica.md](fase_3_especificacao_semantica.md) | Tarefa 3: propriedades semânticas e gramática de atributos |
+| [fase_4_qualidade.md](fase_4_qualidade.md) | Tarefa 4: qualidade da linguagem, da gramática e da gramática de atributos |
 | [studylang.lark](studylang.lark) | Gramática implementada em Lark (LALR(1)) |
 | [check_studylang.py](check_studylang.py) | Parser e avaliador da gramática de atributos, com os exemplos de teste |
+| [metricas.py](metricas.py) | Cálculo das métricas da gramática usadas na fase 4 |
 
 ## 3. Especificação lexical e sintática: decisões principais
 
@@ -109,20 +111,28 @@ Exemplos incluídos e resultado esperado:
 
 ## 6. Qualidade da linguagem e da gramática
 
-A avaliação completa está na secção 3.7 da fase 3. Em resumo:
+A avaliação completa está na [fase 4](fase_4_qualidade.md). As métricas são calculadas com `python metricas.py`. Em resumo:
 
 **Linguagem**
-- **Adequação ao domínio:** as construções correspondem diretamente a conceitos de planeamento de estudo; não é uma linguagem imperativa genérica.
-- **Legibilidade e escrita:** a sintaxe é próxima da linguagem natural (`STUDY "Redes" FOR 3 HOURS`), e o `FOR EACH` evita repetir instruções para cada UC.
-- **Consistência:** os blocos funcionam da mesma forma em todo o lado, e as expressões são aceites onde se espera um inteiro.
-- **Fiabilidade:** os erros de domínio são detetados antes da execução, com linha e mensagem.
+- **Pontos fortes:**
+  - *expressividade:* as construções correspondem a conceitos do domínio;
+  - *unicidade:* há uma só forma de repetir e uma só de decidir;
+  - *consistência:* palavras-chave em maiúsculas e blocos sempre com chavetas;
+  - *fiabilidade:* 11 tipos de erro semântico detetados.
+- **Pontos fracos:**
+  - *documentação:* só há comentários `//`;
+  - *extensibilidade e modularidade:* não há funções nem módulos;
+  - *escalabilidade:* os nomes das UCs são repetidos em cada `FOR EACH`.
 
 **Gramática**
-- **Não ambiguidade:** LALR(1) sem conflitos e sem *dangling else*.
-- **Precedência:** codificada nos níveis da gramática.
-- **Sem símbolos inúteis.**
-- **Tamanho:** 25 não-terminais e 38 terminais.
-- **Gramática de atributos L-atribuída:** avaliada numa só passagem, com erros reportados na linha que os causa.
+- **Tamanho:** 40 terminais, 28 não-terminais e 57 produções.
+- **Parser:** LALR(1) sem conflitos, com 117 estados.
+- **Produções unitárias:** 15, quase todas para agrupar instruções ou para a cadeia de precedência.
+- **Recursividade:** à esquerda nos operadores binários, o que lhes dá associatividade à esquerda.
+
+**Gramática de atributos**
+- **Atributos:** 13 (4 herdados e 9 sintetizados) e 20 condições de contexto.
+- **Avaliação:** L-atribuída, numa só passagem. Os erros são acumulados e mostrados todos de uma vez.
 
 **Limitações assumidas:**
 - **Não há limite diário de horas** (por exemplo, impedir mais de 24 horas num dia), porque a linguagem não tem a noção de dia. Seria uma extensão possível: um bloco `DAY` e uma nova propriedade semântica.
