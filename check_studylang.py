@@ -213,15 +213,16 @@ def check(tree):
                 errs.append((ln(d), f"UC {name}: CREDITS não existe no nível SECONDARY"))
             env = env.add(uc(name), "uc")
         elif d.data == "resource_decl":
+            if nres >= 1:                   # P2: erro na linha do RESOURCE a mais
+                errs.append((ln(d), "mais do que um RESOURCE"))
+            else:
+                limit = int(d.children[0])
             nres += 1
-            limit = int(d.children[0])
         else:
             env, e, _ = var_decl(d, env)
             errs += e
     pe, mh = block(rest[-1].children[0], env)
     errs += pe
-    if nres > 1:
-        errs.append((ln(tree), "mais do que um RESOURCE"))
     if nres == 1 and mh > limit:
         errs.append((ln(rest[-1]), f"horas garantidas ({mh}) excedem RESOURCE TIME ({limit})"))
     return sorted(errs)

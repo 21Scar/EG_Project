@@ -37,7 +37,7 @@ Para suportar o seu propósito, a linguagem baseia-se nas seguintes abstrações
 
 ## 1.4. Exemplos Representativos de Programas
 
-Os cinco exemplos abaixo são os usados no verificador (`check_studylang.py`) e demonstram a sintaxe, a semântica e a separação entre erros sintáticos e semânticos.
+Os seis exemplos abaixo são os usados no verificador (`check_studylang.py`) e demonstram a sintaxe, a semântica e a separação entre erros sintáticos e semânticos.
 
 ### Exemplo 1: Programa universitário (válido)
 
@@ -146,4 +146,13 @@ Falta a declaração do nível (`LEVEL`). Este programa é rejeitado já pelo an
 STUDENT Rui
 UC "Redes" { CREDITS 3 DIFFICULTY 3 }
 PLAN { }
+```
+
+### Exemplo 6: Palavra reservada usada como nome (sintaticamente inválido)
+
+`STUDY` é uma palavra reservada e não pode ser usada como nome de variável. Este programa é rejeitado pelo analisador sintático, o que mostra que as palavras reservadas são de facto reservadas (secção 2.3, *lexer* `basic`).
+
+```study
+STUDENT Rui LEVEL SECONDARY
+PLAN { VAR STUDY = 1 }                          // ERRO: STUDY é palavra reservada
 ```

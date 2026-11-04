@@ -88,8 +88,8 @@ Um programa inicia-se com a identificação do estudante e do nível, seguida de
 * **Sem *dangling else*.** Os corpos de `IF` e `ELSE` são sempre blocos delimitados por chavetas, e o `ELSE IF` obtém-se com a produção `"ELSE" <If_Stmt>`, pelo que cada `ELSE` se associa sem ambiguidade ao `IF` mais próximo.
 * **Precedência e associatividade.** A forma `( op <Term> )*` dá associatividade à esquerda a `+ - * /`, com `* /` mais fortes que `+ -`. Nas condições, `NOT` > `AND` > `OR`. O operando de `NOT` é uma comparação (ou outro `NOT`); não há condições entre parênteses, o que evita o conflito com `"(" <Expression> ")"`. Assim, `NOT u.DIFFICULTY > 2` significa `NOT (u.DIFFICULTY > 2)`.
 * **Gramática LALR(1) e sem ambiguidade.** A implementação em `Lark` usa o analisador LALR(1); o gerador constrói a tabela de análise sem conflitos, o que garante que a gramática não é ambígua.
-* **Léxico `basic`.** O analisador lexical usado é o `basic` do `Lark` (e não o contextual, que é o *default*). Com o contextual, uma palavra reservada seria aceite como `ID` onde só um `ID` é esperado (por exemplo, `VAR STUDY = 1`), contrariando a regra de que as palavras reservadas não podem ser nomes.
-* **Separação entre sintaxe e semântica.** Programas como o Exemplo 3 e o Exemplo 4 (secção 1.4) são aceites pela gramática; as violações são tratadas na secção 3. O Exemplo 5 (sem `LEVEL`) é rejeitado pelo analisador sintático.
+* **Léxico `basic`.** O analisador lexical usado é o `basic` do `Lark` (e não o contextual, que é o *default*). Com o contextual, uma palavra reservada seria aceite como `ID` onde só um `ID` é esperado (por exemplo, `VAR STUDY = 1`), contrariando a regra de que as palavras reservadas não podem ser nomes. Com o `basic`, esse programa é rejeitado com um erro sintático (Exemplo 6, secção 1.4).
+* **Separação entre sintaxe e semântica.** Programas como o Exemplo 3 e o Exemplo 4 (secção 1.4) são aceites pela gramática; as violações são tratadas na secção 3. Os Exemplos 5 (sem `LEVEL`) e 6 (palavra reservada como nome) são rejeitados pelo analisador sintático.
 
 ## 2.4. Gramática em Lark (implementação)
 

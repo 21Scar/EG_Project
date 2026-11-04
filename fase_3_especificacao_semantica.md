@@ -7,7 +7,7 @@ Esta secção identifica as propriedades da *StudyLang* que não podem ser deter
 | # | Propriedade | Onde é violada nos exemplos |
 |---|---|---|
 | P1 | Uma UC só pode ser declarada uma vez (identificada pelo nome) | Ex. 3, linha 4 |
-| P2 | No máximo uma declaração `RESOURCE TIME` | Ex. 4, linha 1 |
+| P2 | No máximo uma declaração `RESOURCE TIME` | Ex. 4, linha 4 |
 | P3 | `CREDITS` depende do nível: obrigatório em cada UC de `UNIVERSITY`; proibido em `SECONDARY`, tanto na declaração da UC como em `u.CREDITS` | Ex. 4, linha 2; Ex. 3, linhas 3 e 20 |
 | P4 | Uma UC referida em `STUDY "nome"` ou na lista de um `FOR EACH` tem de estar declarada; `STUDY id` exige que `id` seja o iterador de um `FOR EACH` | Ex. 3, linha 10 |
 | P5 | Um nome usado numa expressão ou atribuído tem de estar declarado e visível (âmbito estático por bloco); a atribuição só é válida sobre uma variável | Ex. 3, linhas 11 e 17 |
@@ -37,11 +37,13 @@ OK: sintaxe e semântica válidas
   linha 22: 'x' não é iterador de UC (não tem DIFFICULTY)
   linha 23: divisão por zero
 === Ex4 - universitário (erros de nível) ===
-  linha 1: mais do que um RESOURCE
   linha 2: UC "Redes": CREDITS obrigatório no nível UNIVERSITY
+  linha 4: mais do que um RESOURCE
   linha 5: horas têm de ser positivas
 === Ex5 - erro sintático (falta LEVEL) ===
 ERRO SINTÁTICO (linha 2, col 1): token inesperado
+=== Ex6 - erro sintático (palavra reservada como nome) ===
+ERRO SINTÁTICO (linha 2, col 12): token inesperado
 ```
 
 ## 3.2. Modelo de Ambiente
@@ -62,7 +64,7 @@ ERRO SINTÁTICO (linha 2, col 1): token inesperado
 | Símbolo | Herdados (↓) | Sintetizados (↑) |
 |---|---|---|
 | `start` | – | `errors` |
-| `decl` (`uc_decl`, `resource_decl`, `var_decl`) | `env_in` | `env_out`, `errors`, `nres`, `limit` |
+| `decl` (`uc_decl`, `resource_decl`, `var_decl`) | `env_in`, `nres_in`, `limit_in` | `env_out`, `errors`, `nres_out`, `limit_out` |
 | `plan`, `block`, `stmt`, `if_stmt`, `else_part`, `foreach_stmt` | `env_in` | `env_out` (só `stmt`), `errors`, `minHours` |
 | `expr`, `cond` e subexpressões | `env` | `type`, `const`, `val`, `errors` |
 | `string_list` | `env` | `errors`, `count` |
@@ -77,13 +79,16 @@ Notação: `A.x` é o atributo `x` do símbolo `A`; `++` concatena listas de err
 
 ```
 start → STUDENT ID LEVEL level decl* plan
-    env_0        = emptyEnv(level.kind)               // level.kind = uni | sec
+    env_0         = emptyEnv(level.kind)              // level.kind = uni | sec
+    decl_1.env_in = env_0      decl_1.nres_in = 0      decl_1.limit_in = 0
     decl_i.env_in = decl_{i-1}.env_out                 // encadeamento da esquerda para a direita
-    plan.env_in  = decl_n.env_out
-    nres         = Σ decl_i.nres      limit = limit do último RESOURCE
+    decl_i.nres_in = decl_{i-1}.nres_out      decl_i.limit_in = decl_{i-1}.limit_out
+    plan.env_in   = decl_n.env_out
+    nres = decl_n.nres_out      limit = decl_n.limit_out
     start.errors = ⋃ decl_i.errors ++ plan.errors
-        ++ (if nres > 1 then [erro "mais do que um RESOURCE"])                          // P2
         ++ (if nres == 1 and plan.minHours > limit then [erro "horas garantidas excedem RESOURCE TIME"])  // P11
+
+(em uc_decl e var_decl: nres_out = nres_in, limit_out = limit_in)
 
 uc_decl → UC STRING { credits? difficulty }
     uc_decl.errors =
@@ -93,8 +98,11 @@ uc_decl → UC STRING { credits? difficulty }
     uc_decl.env_out = add(env_in, uc:STRING, uc)
 
 resource_decl → RESOURCE TIME INT HOURS
-    resource_decl.env_out = env_in
-    resource_decl.nres = 1       resource_decl.limit = INT.val
+    resource_decl.env_out  = env_in
+    resource_decl.nres_out = nres_in + 1
+    resource_decl.limit_out = (INT.val if nres_in == 0 else limit_in)    // conta o primeiro RESOURCE
+    resource_decl.errors =
+          (if nres_in ≥ 1 then [erro "mais do que um RESOURCE"])        // P2, na linha do RESOURCE a mais
 
 var_decl → VAR ID = expr
     expr.env = var_decl.env_in
@@ -205,8 +213,8 @@ cond → cond1 OR cond2 | cond1 AND cond2 | NOT cond1
 
 ## 3.5. Dependências e Ordem de Avaliação
 
-* **Herdados:** `env_in` (e `env` nas expressões) fluem de cima para baixo e da esquerda para a direita: o `env_out` de uma declaração ou instrução é o `env_in` da seguinte, e o do `foreach_stmt` é construído a partir do do pai.
-* **Sintetizados:** `type`, `const`, `val`, `errors`, `minHours`, `count`, `nres`, `limit` e `env_out` fluem das folhas para a raiz.
+* **Herdados:** `env_in` (e `env` nas expressões), `nres_in` e `limit_in` fluem de cima para baixo e da esquerda para a direita: o `env_out`/`nres_out`/`limit_out` de uma declaração é o `env_in`/`nres_in`/`limit_in` da seguinte, e o `env_in` do corpo de um `foreach_stmt` é construído a partir do do pai.
+* **Sintetizados:** `type`, `const`, `val`, `errors`, `minHours`, `count`, `nres_out`, `limit_out` e `env_out` fluem das folhas para a raiz.
 * **L-atribuída:** os atributos herdados de um símbolo dependem apenas do pai e dos irmãos à sua esquerda; os sintetizados, só dos filhos. O grafo de dependências é acíclico, e todos os atributos podem ser avaliados numa única passagem em profundidade, da esquerda para a direita, que é o que o verificador faz.
 
 ### Exemplo de avaliação (Ex. 3, linhas 8 e 10)
@@ -233,14 +241,39 @@ cond → cond1 OR cond2 | cond1 AND cond2 | NOT cond1
 
 O verificador não usa uma ferramenta de AG (como o `LarkAG`): as regras são avaliadas por funções recursivas que devolvem os atributos sintetizados e recebem o ambiente como argumento. Isto corresponde diretamente à AG acima, por ser L-atribuída.
 
-## 3.7. Qualidade da Linguagem e da Gramática (rascunho)
+## 3.7. Qualidade da Linguagem e da Gramática
+
+Esta secção avalia a *StudyLang* (tarefa 4 do enunciado) em duas partes: a qualidade da **linguagem**, do ponto de vista de quem a usa, e a qualidade da **gramática**, do ponto de vista de quem a especifica e implementa.
+
+### 3.7.1. Qualidade da linguagem
 
 | Propriedade | Avaliação |
 |---|---|
-| **Adequação ao domínio** | As construções (`UC`, `RESOURCE`, `PLAN`, `STUDY`, `FOR EACH`, `LEVEL`) correspondem diretamente a conceitos do planeamento de estudo; não é uma linguagem imperativa genérica. |
-| **Legibilidade** | Palavras-chave em inglês próximas da linguagem natural (`STUDY "X" FOR 8 HOURS`); a estrutura em blocos e a identação são claras. |
-| **Ausência de ambiguidade** | Gramática LALR(1) sem conflitos; sem *dangling else*; precedência e associatividade codificadas na própria gramática. |
-| **Separação sintaxe/semântica** | Uma só gramática para os dois níveis; as regras que dependem do nível (`CREDITS`) estão na AG, que conhece o `level`. |
-| **Minimalidade** | Sem produções inúteis; um só mecanismo de repetição (`FOR EACH`) e um de ramificação (`IF`), suficientes para o domínio. |
-| **Verificabilidade** | Erros semânticos localizados (linha e mensagem) e testados em cinco exemplos, incluindo erros sintáticos. |
-| **Limitações assumidas** | `minHours` é só um limite inferior (valores que dependem de `u.CREDITS` ou `u.DIFFICULTY` não contam); só existem inteiros; não há limite diário de horas nem pré-requisitos entre UCs; `STUDY` por nome só aceita *strings* literais; as condições não aceitam parênteses de agrupamento. |
+| **Adequação ao domínio** | As construções (`STUDENT`, `LEVEL`, `UC`, `RESOURCE`, `PLAN`, `STUDY`) correspondem diretamente a conceitos do planeamento de estudo. Não há construções genéricas sem significado no domínio (não há funções, *arrays* nem *strings* manipuláveis), por isso não é uma linguagem imperativa de uso geral. |
+| **Legibilidade** | As palavras-chave são inglesas e próximas da linguagem natural (`STUDY "Redes" FOR 3 HOURS`, `FOR EACH u IN [...]`). Os blocos são sempre delimitados por chavetas, o que torna a estrutura visível mesmo sem identação. Os comentários `//` permitem documentar o plano. |
+| **Facilidade de escrita** | Um programa mínimo tem três linhas (`STUDENT`, uma `UC`, `PLAN`). O `FOR EACH` sobre UCs e o acesso `u.DIFFICULTY` evitam repetir o mesmo `STUDY` para cada UC. Em contrapartida, a lista do `FOR EACH` tem de ser escrita à mão (não há "todas as UCs"). |
+| **Expressividade** | Chega para planos que dependem das propriedades de cada UC (mais horas se a dificuldade for alta, menos se os créditos forem baixos), com condições compostas e variáveis. Não expressa calendários (dias, semanas), pré-requisitos nem prioridades entre UCs. |
+| **Consistência e ortogonalidade** | Os blocos funcionam da mesma forma em `PLAN`, `IF`, `ELSE` e `FOR EACH`. Qualquer instrução pode aparecer em qualquer bloco. As expressões são aceites em todos os sítios onde se espera um inteiro (`VAR`, atribuição, horas do `STUDY`, comparações). |
+| **Fiabilidade (deteção de erros)** | Os erros sintáticos são detetados pelo *parser*. As 11 propriedades semânticas (P1 a P11) são detetadas antes da execução, com linha e mensagem, incluindo os erros próprios do domínio (UC não declarada, excesso de horas, `CREDITS` fora do nível). O limite `minHours` nunca dá falsos positivos. |
+| **Adaptação ao utilizador** | O `LEVEL` adapta as regras ao tipo de estudante sem mudar a sintaxe: o mesmo programa-base serve para o secundário e para o universitário, mudando só os atributos permitidos. |
+
+### 3.7.2. Qualidade da gramática
+
+| Propriedade | Avaliação |
+|---|---|
+| **Não ambiguidade** | O `Lark` constrói a tabela LALR(1) sem conflitos, o que prova que a gramática não é ambígua. Não existe *dangling else*: os corpos de `IF`/`ELSE` são blocos, e o `ELSE IF` é `ELSE` seguido de um `if_stmt`. |
+| **Precedência e associatividade** | Estão codificadas nos níveis da própria gramática (`expr` → `term` → `factor`; `or_cond` → `and_cond` → `not_cond`), sem declarações de precedência à parte. A recursividade à esquerda dá associatividade à esquerda, que um *parser* LR trata sem problemas. |
+| **Ausência de símbolos inúteis** | Todos os não-terminais são alcançáveis a partir de `start` e todos derivam uma frase terminal. Não há produções repetidas. |
+| **Tamanho** | 25 não-terminais e 38 terminais (21 palavras reservadas, `ID`, `STRING`, `INT`, `REL_OP` e 13 símbolos de pontuação e operadores). Depois da expansão do EBNF pelo `Lark`, 57 produções. É pequena o suficiente para ser lida numa página. |
+| **Separação entre léxico, sintaxe e semântica** | O léxico usa o *lexer* `basic`, para que as palavras reservadas sejam de facto reservadas (`VAR STUDY = 1` é erro sintático, Ex. 6). A sintaxe é uma só para os dois níveis (`CREDITS` opcional), e o que depende do contexto (nível, âmbitos, tipos, horas) fica na gramática de atributos. |
+| **Legibilidade e manutenção** | As alternativas têm nomes (`-> add`, `-> compare`, ...) e as regras de passagem são *inlined* (`?expr`), pelo que a árvore sintática tem só os nós com significado. Cada função do verificador corresponde a um grupo de produções (3.6), por isso acrescentar uma construção exige uma produção e uma função. |
+| **Avaliação dos atributos** | A gramática de atributos é L-atribuída, e todos os atributos são calculados numa só passagem em profundidade. Os erros são locais: cada um é reportado na linha da construção que o causa (por exemplo, o segundo `RESOURCE` no Ex. 4). |
+
+### 3.7.3. Limitações assumidas
+
+* `minHours` é só um limite inferior: as horas que dependem de `u.CREDITS` ou `u.DIFFICULTY` não contam para P11.
+* Só existem inteiros (não há horas fracionárias).
+* **Não há limite diário de horas** (por exemplo, impedir mais de 24 horas num dia), porque a linguagem não tem a noção de dia ou calendário. Seria uma extensão natural: uma construção `DAY` dentro do `PLAN` e uma nova propriedade semântica que verificasse a soma de cada dia.
+* Não há pré-requisitos nem prioridades entre UCs.
+* O `STUDY` por nome só aceita *strings* literais, e a lista do `FOR EACH` tem de ser escrita explicitamente.
+* As condições não aceitam parênteses de agrupamento (por exemplo, `(a OR b) AND c`). Esta decisão evita o conflito com os parênteses das expressões.
