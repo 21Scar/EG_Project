@@ -1,0 +1,5 @@
+STUDENT Rui LEVEL UNIVERSITY
+UC "Redes" { DIFFICULTY 3 }                     // ERRO: falta CREDITS no universitario
+RESOURCE TIME 10 HOURS
+RESOURCE TIME 12 HOURS                          // ERRO: dois RESOURCE
+PLAN { STUDY "Redes" FOR 0 HOURS }              // ERRO: horas nao positivas

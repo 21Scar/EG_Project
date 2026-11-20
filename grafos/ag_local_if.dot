@@ -1,0 +1,44 @@
+digraph "if_stmt → IF ( cond ) block else_part?" {
+  rankdir=TB;
+  compound=true;
+  node [fontname="Helvetica", fontsize=11, style=filled, fillcolor="white"];
+  edge [fontname="Helvetica", fontsize=9];
+  subgraph cluster_0 {
+    label=""; style="rounded"; color="#999999";
+    "o1#" [label="if_stmt", shape="plaintext", style="", fontsize="12"];
+    "o1.env_in" [label="env_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o1.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o1.minHours" [label="minHours", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_1 {
+    label=""; style="rounded"; color="#999999";
+    "o2#" [label="cond", shape="plaintext", style="", fontsize="12"];
+    "o2.env" [label="env", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o2.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_2 {
+    label=""; style="rounded"; color="#999999";
+    "o3#" [label="block", shape="plaintext", style="", fontsize="12"];
+    "o3.env_in" [label="env_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o3.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o3.minHours" [label="minHours", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_3 {
+    label=""; style="rounded"; color="#999999";
+    "o4#" [label="else_part", shape="plaintext", style="", fontsize="12"];
+    "o4.env_in" [label="env_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o4.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o4.minHours" [label="minHours", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  "o1#" -> "o2#" [style="invis", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_0", lhead="cluster_1"];
+  "o1#" -> "o3#" [style="invis", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_0", lhead="cluster_2"];
+  "o1#" -> "o4#" [style="invis", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_0", lhead="cluster_3"];
+  "o1.env_in" -> "o2.env" [constraint="false"];
+  "o1.env_in" -> "o3.env_in" [constraint="false"];
+  "o1.env_in" -> "o4.env_in" [constraint="false"];
+  "o2.errors" -> "o1.errors" [constraint="false"];
+  "o3.errors" -> "o1.errors" [constraint="false"];
+  "o3.minHours" -> "o1.minHours" [constraint="false"];
+  "o4.errors" -> "o1.errors" [constraint="false"];
+  "o4.minHours" -> "o1.minHours" [constraint="false"];
+}

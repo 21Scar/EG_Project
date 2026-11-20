@@ -1,0 +1,58 @@
+digraph "start → STUDENT ID LEVEL level decl* plan" {
+  rankdir=TB;
+  compound=true;
+  node [fontname="Helvetica", fontsize=11, style=filled, fillcolor="white"];
+  edge [fontname="Helvetica", fontsize=9];
+  subgraph cluster_0 {
+    label=""; style="rounded"; color="#999999";
+    "o1#" [label="start", shape="plaintext", style="", fontsize="12"];
+    "o1.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_1 {
+    label=""; style="rounded"; color="#999999";
+    "o2#" [label="level", shape="plaintext", style="", fontsize="12"];
+    "o2.kind" [label="kind", shape="ellipse", fillcolor="#e6e6e6", fontsize="10"];
+  }
+  subgraph cluster_2 {
+    label=""; style="rounded"; color="#999999";
+    "o3#" [label="decl₁", shape="plaintext", style="", fontsize="12"];
+    "o3.env_in" [label="env_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o3.env_out" [label="env_out", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o3.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o3.limit_out" [label="limit_out", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o3.nres_out" [label="nres_out", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_3 {
+    label=""; style="rounded"; color="#999999";
+    "o4#" [label="decl₂", shape="plaintext", style="", fontsize="12"];
+    "o4.env_in" [label="env_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o4.env_out" [label="env_out", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o4.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o4.limit_in" [label="limit_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o4.limit_out" [label="limit_out", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o4.nres_in" [label="nres_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o4.nres_out" [label="nres_out", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_4 {
+    label=""; style="rounded"; color="#999999";
+    "o5#" [label="plan", shape="plaintext", style="", fontsize="12"];
+    "o5.env_in" [label="env_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o5.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o5.minHours" [label="minHours", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  "o1#" -> "o2#" [style="invis", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_0", lhead="cluster_1"];
+  "o1#" -> "o3#" [style="invis", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_0", lhead="cluster_2"];
+  "o1#" -> "o4#" [style="invis", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_0", lhead="cluster_3"];
+  "o1#" -> "o5#" [style="invis", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_0", lhead="cluster_4"];
+  "o2.kind" -> "o3.env_in" [constraint="false"];
+  "o3.env_out" -> "o4.env_in" [constraint="false"];
+  "o3.errors" -> "o1.errors" [constraint="false"];
+  "o3.limit_out" -> "o4.limit_in" [constraint="false"];
+  "o3.nres_out" -> "o4.nres_in" [constraint="false"];
+  "o4.env_out" -> "o5.env_in" [constraint="false"];
+  "o4.errors" -> "o1.errors" [constraint="false"];
+  "o4.limit_out" -> "o1.errors" [constraint="false"];
+  "o4.nres_out" -> "o1.errors" [constraint="false"];
+  "o5.errors" -> "o1.errors" [constraint="false"];
+  "o5.minHours" -> "o1.errors" [constraint="false"];
+}

@@ -1,0 +1,22 @@
+STUDENT Joao LEVEL SECONDARY
+
+UC "Matematica A" { DIFFICULTY 5 }
+UC "Fisica"       { DIFFICULTY 4 }
+UC "Portugues"    { DIFFICULTY 2 }
+
+RESOURCE TIME 20 HOURS
+VAR base = 2                          // variavel global
+
+PLAN {
+    VAR extra = 1                     // local ao PLAN
+    FOR EACH u IN [ "Matematica A", "Fisica", "Portugues" ] {
+        VAR h = base + u.DIFFICULTY   // local ao corpo do ciclo
+        IF ( u.DIFFICULTY >= 4 ) {
+            VAR extra = 2             // shadowing permitido num bloco interior
+            STUDY u FOR h + extra HOURS
+        } ELSE {
+            STUDY u FOR h HOURS
+        }
+    }
+    extra = extra + 1
+}

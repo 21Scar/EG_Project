@@ -1,0 +1,36 @@
+digraph "block → { stmt* }" {
+  rankdir=TB;
+  compound=true;
+  node [fontname="Helvetica", fontsize=11, style=filled, fillcolor="white"];
+  edge [fontname="Helvetica", fontsize=9];
+  subgraph cluster_0 {
+    label=""; style="rounded"; color="#999999";
+    "o1#" [label="block", shape="plaintext", style="", fontsize="12"];
+    "o1.env_in" [label="env_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o1.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o1.minHours" [label="minHours", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_1 {
+    label=""; style="rounded"; color="#999999";
+    "o2#" [label="stmt₁", shape="plaintext", style="", fontsize="12"];
+    "o2.env_in" [label="env_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o2.env_out" [label="env_out", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o2.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o2.minHours" [label="minHours", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_2 {
+    label=""; style="rounded"; color="#999999";
+    "o3#" [label="stmt₂", shape="plaintext", style="", fontsize="12"];
+    "o3.env_in" [label="env_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o3.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o3.minHours" [label="minHours", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  "o1#" -> "o2#" [style="invis", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_0", lhead="cluster_1"];
+  "o1#" -> "o3#" [style="invis", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_0", lhead="cluster_2"];
+  "o1.env_in" -> "o2.env_in" [constraint="false"];
+  "o2.env_out" -> "o3.env_in" [constraint="false"];
+  "o2.errors" -> "o1.errors" [constraint="false"];
+  "o2.minHours" -> "o1.minHours" [constraint="false"];
+  "o3.errors" -> "o1.errors" [constraint="false"];
+  "o3.minHours" -> "o1.minHours" [constraint="false"];
+}

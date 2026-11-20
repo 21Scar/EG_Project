@@ -1,0 +1,228 @@
+digraph "ag_instancia" {
+  rankdir=TB;
+  compound=true;
+  node [fontname="Helvetica", fontsize=11, style=filled, fillcolor="white"];
+  edge [fontname="Helvetica", fontsize=9];
+  subgraph cluster_0 {
+    label=""; style="rounded"; color="#999999";
+    "o1#" [label="start", shape="plaintext", style="", fontsize="12"];
+    "o1.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_1 {
+    label=""; style="rounded"; color="#999999";
+    "o2#" [label="level SECONDARY", shape="plaintext", style="", fontsize="12"];
+    "o2.kind" [label="kind", shape="ellipse", fillcolor="#e6e6e6", fontsize="10"];
+  }
+  subgraph cluster_2 {
+    label=""; style="rounded"; color="#999999";
+    "o3#" [label="decl", shape="plaintext", style="", fontsize="12"];
+    "o3.env_in" [label="env_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o3.env_out" [label="env_out", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o3.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o3.limit_in" [label="limit_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o3.limit_out" [label="limit_out", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o3.nres_in" [label="nres_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o3.nres_out" [label="nres_out", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_3 {
+    label=""; style="rounded"; color="#999999";
+    "o4#" [label="uc_decl \"Fisica\"", shape="plaintext", style="", fontsize="12"];
+    "o4.env_in" [label="env_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o4.env_out" [label="env_out", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o4.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_4 {
+    label=""; style="rounded"; color="#999999";
+    "o5#" [label="STRING \"Fisica\"", shape="plaintext", style="", fontsize="12"];
+    "o5.name" [label="name", shape="ellipse", fillcolor="#e6e6e6", fontsize="10"];
+  }
+  subgraph cluster_5 {
+    label=""; style="rounded"; color="#999999";
+    "o6#" [label="plan", shape="plaintext", style="", fontsize="12"];
+    "o6.env_in" [label="env_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o6.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o6.minHours" [label="minHours", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_6 {
+    label=""; style="rounded"; color="#999999";
+    "o7#" [label="block", shape="plaintext", style="", fontsize="12"];
+    "o7.env_in" [label="env_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o7.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o7.minHours" [label="minHours", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_7 {
+    label=""; style="rounded"; color="#999999";
+    "o8#" [label="stmt", shape="plaintext", style="", fontsize="12"];
+    "o8.env_in" [label="env_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o8.env_out" [label="env_out", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o8.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o8.minHours" [label="minHours", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_8 {
+    label=""; style="rounded"; color="#999999";
+    "o9#" [label="var_decl h", shape="plaintext", style="", fontsize="12"];
+    "o9.env_in" [label="env_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o9.env_out" [label="env_out", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o9.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_9 {
+    label=""; style="rounded"; color="#999999";
+    "o10#" [label="ID h", shape="plaintext", style="", fontsize="12"];
+    "o10.name" [label="name", shape="ellipse", fillcolor="#e6e6e6", fontsize="10"];
+  }
+  subgraph cluster_10 {
+    label=""; style="rounded"; color="#999999";
+    "o11#" [label="expr  2", shape="plaintext", style="", fontsize="12"];
+    "o11.env" [label="env", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o11.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o11.type" [label="type", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o11.val" [label="val", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_11 {
+    label=""; style="rounded"; color="#999999";
+    "o12#" [label="INT 2", shape="plaintext", style="", fontsize="12"];
+    "o12.val" [label="val", shape="ellipse", fillcolor="#e6e6e6", fontsize="10"];
+  }
+  subgraph cluster_12 {
+    label=""; style="rounded"; color="#999999";
+    "o13#" [label="stmt", shape="plaintext", style="", fontsize="12"];
+    "o13.env_in" [label="env_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o13.env_out" [label="env_out", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o13.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o13.minHours" [label="minHours", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_13 {
+    label=""; style="rounded"; color="#999999";
+    "o14#" [label="study_stmt", shape="plaintext", style="", fontsize="12"];
+    "o14.env_in" [label="env_in", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o14.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o14.minHours" [label="minHours", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_14 {
+    label=""; style="rounded"; color="#999999";
+    "o15#" [label="STRING \"Fisica\"", shape="plaintext", style="", fontsize="12"];
+    "o15.name" [label="name", shape="ellipse", fillcolor="#e6e6e6", fontsize="10"];
+  }
+  subgraph cluster_15 {
+    label=""; style="rounded"; color="#999999";
+    "o16#" [label="expr  h * 2", shape="plaintext", style="", fontsize="12"];
+    "o16.const" [label="const", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o16.env" [label="env", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o16.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o16.type" [label="type", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o16.val" [label="val", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_16 {
+    label=""; style="rounded"; color="#999999";
+    "o17#" [label="expr  h", shape="plaintext", style="", fontsize="12"];
+    "o17.const" [label="const", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o17.env" [label="env", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o17.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o17.type" [label="type", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o17.val" [label="val", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_17 {
+    label=""; style="rounded"; color="#999999";
+    "o18#" [label="ID h", shape="plaintext", style="", fontsize="12"];
+    "o18.name" [label="name", shape="ellipse", fillcolor="#e6e6e6", fontsize="10"];
+  }
+  subgraph cluster_18 {
+    label=""; style="rounded"; color="#999999";
+    "o19#" [label="expr  2", shape="plaintext", style="", fontsize="12"];
+    "o19.const" [label="const", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o19.env" [label="env", shape="ellipse", fillcolor="#d8f0d2", fontsize="10"];
+    "o19.errors" [label="errors", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o19.type" [label="type", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+    "o19.val" [label="val", shape="ellipse", fillcolor="#fde2c4", fontsize="10"];
+  }
+  subgraph cluster_19 {
+    label=""; style="rounded"; color="#999999";
+    "o20#" [label="INT 2", shape="plaintext", style="", fontsize="12"];
+    "o20.val" [label="val", shape="ellipse", fillcolor="#e6e6e6", fontsize="10"];
+  }
+  "o1#" -> "o2#" [style="dotted", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_0", lhead="cluster_1"];
+  "o1#" -> "o3#" [style="dotted", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_0", lhead="cluster_2"];
+  "o1#" -> "o6#" [style="dotted", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_0", lhead="cluster_5"];
+  "o2.kind" -> "o3.env_in" [constraint="false"];
+  "o3#" -> "o4#" [style="dotted", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_2", lhead="cluster_3"];
+  "o3.env_in" -> "o4.env_in" [constraint="false"];
+  "o3.env_out" -> "o6.env_in" [constraint="false"];
+  "o3.errors" -> "o1.errors" [constraint="false"];
+  "o3.limit_in" -> "o3.limit_out" [constraint="false"];
+  "o3.limit_out" -> "o1.errors" [constraint="false"];
+  "o3.nres_in" -> "o3.nres_out" [constraint="false"];
+  "o3.nres_out" -> "o1.errors" [constraint="false"];
+  "o4#" -> "o5#" [style="dotted", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_3", lhead="cluster_4"];
+  "o4.env_in" -> "o4.errors" [constraint="false"];
+  "o4.env_in" -> "o4.env_out" [constraint="false"];
+  "o4.env_out" -> "o3.env_out" [constraint="false"];
+  "o4.errors" -> "o3.errors" [constraint="false"];
+  "o5.name" -> "o4.errors" [constraint="false"];
+  "o5.name" -> "o4.env_out" [constraint="false"];
+  "o6#" -> "o7#" [style="dotted", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_5", lhead="cluster_6"];
+  "o6.env_in" -> "o7.env_in" [constraint="false"];
+  "o6.errors" -> "o1.errors" [constraint="false"];
+  "o6.minHours" -> "o1.errors" [constraint="false"];
+  "o7#" -> "o8#" [style="dotted", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_6", lhead="cluster_7"];
+  "o7#" -> "o13#" [style="dotted", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_6", lhead="cluster_12"];
+  "o7.env_in" -> "o8.env_in" [constraint="false"];
+  "o7.errors" -> "o6.errors" [constraint="false"];
+  "o7.minHours" -> "o6.minHours" [constraint="false"];
+  "o8#" -> "o9#" [style="dotted", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_7", lhead="cluster_8"];
+  "o8.env_in" -> "o9.env_in" [constraint="false"];
+  "o8.env_out" -> "o13.env_in" [constraint="false"];
+  "o8.errors" -> "o7.errors" [constraint="false"];
+  "o8.minHours" -> "o7.minHours" [constraint="false"];
+  "o9#" -> "o10#" [style="dotted", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_8", lhead="cluster_9"];
+  "o9#" -> "o11#" [style="dotted", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_8", lhead="cluster_10"];
+  "o9.env_in" -> "o11.env" [constraint="false"];
+  "o9.env_in" -> "o9.errors" [constraint="false"];
+  "o9.env_in" -> "o9.env_out" [constraint="false"];
+  "o9.env_out" -> "o8.env_out" [constraint="false"];
+  "o9.errors" -> "o8.errors" [constraint="false"];
+  "o10.name" -> "o9.errors" [constraint="false"];
+  "o10.name" -> "o9.env_out" [constraint="false"];
+  "o11#" -> "o12#" [style="dotted", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_10", lhead="cluster_11"];
+  "o11.errors" -> "o9.errors" [constraint="false"];
+  "o11.type" -> "o9.errors" [constraint="false"];
+  "o12.val" -> "o11.val" [constraint="false"];
+  "o13#" -> "o14#" [style="dotted", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_12", lhead="cluster_13"];
+  "o13.env_in" -> "o14.env_in" [constraint="false"];
+  "o13.env_in" -> "o13.env_out" [constraint="false"];
+  "o13.errors" -> "o7.errors" [constraint="false"];
+  "o13.minHours" -> "o7.minHours" [constraint="false"];
+  "o14#" -> "o15#" [style="dotted", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_13", lhead="cluster_14"];
+  "o14#" -> "o16#" [style="dotted", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_13", lhead="cluster_15"];
+  "o14.env_in" -> "o16.env" [constraint="false"];
+  "o14.env_in" -> "o14.errors" [constraint="false"];
+  "o14.errors" -> "o13.errors" [constraint="false"];
+  "o14.minHours" -> "o13.minHours" [constraint="false"];
+  "o15.name" -> "o14.errors" [constraint="false"];
+  "o16#" -> "o17#" [style="dotted", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_15", lhead="cluster_16"];
+  "o16#" -> "o19#" [style="dotted", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_15", lhead="cluster_18"];
+  "o16.const" -> "o14.errors" [constraint="false"];
+  "o16.const" -> "o14.minHours" [constraint="false"];
+  "o16.env" -> "o17.env" [constraint="false"];
+  "o16.env" -> "o19.env" [constraint="false"];
+  "o16.errors" -> "o14.errors" [constraint="false"];
+  "o16.type" -> "o14.errors" [constraint="false"];
+  "o16.val" -> "o14.errors" [constraint="false"];
+  "o16.val" -> "o14.minHours" [constraint="false"];
+  "o17#" -> "o18#" [style="dotted", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_16", lhead="cluster_17"];
+  "o17.const" -> "o16.const" [constraint="false"];
+  "o17.const" -> "o16.val" [constraint="false"];
+  "o17.env" -> "o17.type" [constraint="false"];
+  "o17.env" -> "o17.errors" [constraint="false"];
+  "o17.errors" -> "o16.errors" [constraint="false"];
+  "o17.type" -> "o16.type" [constraint="false"];
+  "o17.val" -> "o16.val" [constraint="false"];
+  "o18.name" -> "o17.type" [constraint="false"];
+  "o18.name" -> "o17.errors" [constraint="false"];
+  "o19#" -> "o20#" [style="dotted", color="#aaaaaa", arrowhead="none", weight="5", ltail="cluster_18", lhead="cluster_19"];
+  "o19.const" -> "o16.const" [constraint="false"];
+  "o19.const" -> "o16.val" [constraint="false"];
+  "o19.errors" -> "o16.errors" [constraint="false"];
+  "o19.type" -> "o16.type" [constraint="false"];
+  "o19.val" -> "o16.val" [constraint="false"];
+  "o20.val" -> "o19.val" [constraint="false"];
+}

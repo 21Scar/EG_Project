@@ -1,0 +1,13 @@
+STUDENT Joao LEVEL SECONDARY
+
+UC "Matematica A" { DIFFICULTY 5 }
+UC "Fisica" { DIFFICULTY 4 }
+UC "Portugues" { DIFFICULTY 2 }
+
+RESOURCE TIME 20 HOURS
+
+PLAN {
+    STUDY "Matematica A" FOR 9 HOURS
+    STUDY "Fisica" FOR 8 HOURS
+    STUDY "Portugues" FOR 4 HOURS
+}

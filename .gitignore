@@ -8,3 +8,11 @@ Thumbs.db
 # Ambientes virtuais do Python / Conda (se aplicável)
 .venv/
 env/
+
+# Cache do Python
+__pycache__/
+*.pyc
+
+# Saídas locais de studylang.py (relatorio_*, grafos_*); os exemplos ficam em relatorios/ e grafos/
+relatorio_*/
+grafos_*/

@@ -1,0 +1,13 @@
+STUDENT Marta LEVEL UNIVERSITY
+
+UC "Algebra" { CREDITS 6 DIFFICULTY 5 }
+UC "Historia" { CREDITS 3 DIFFICULTY 1 }
+
+RESOURCE TIME 25 HOURS
+
+PLAN {
+    FOR EACH u IN [ "Algebra", "Historia" ] {
+        VAR h = 2 * u.DIFFICULTY
+        STUDY u FOR h + 1 HOURS
+    }
+}

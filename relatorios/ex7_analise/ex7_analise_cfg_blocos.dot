@@ -1,0 +1,27 @@
+digraph "ex7_analise_cfg_blocos" {
+  rankdir=TB;
+  compound=true;
+  node [fontname="Helvetica", fontsize=11, style=filled, fillcolor="white"];
+  edge [fontname="Helvetica", fontsize=9];
+  "ENTRY" [label="ENTRY", shape="oval"];
+  "B1" [label="B1\nl.3: UC \"Algebra\" { CREDITS 6 DIFFICULTY 5 }\nl.4: UC \"Historia\" { CREDITS 3 DIFFICULTY 1 }\nl.6: RESOURCE TIME 25 HOURS\nl.7: VAR base = 2\nl.8: VAR bonus = 10\nl.11: VAR total = 0\nl.12: bonus = 1", shape="box", fillcolor="#dbe9f7"];
+  "B2" [label="B2\nl.13: FOR EACH u IN [\"Algebra\", \"Historia\"]", shape="hexagon", fillcolor="#e6dcf5"];
+  "B3" [label="B3\nl.14: VAR h = base * u.DIFFICULTY", shape="box", fillcolor="#dbe9f7"];
+  "B4" [label="B4\nl.15: IF ( base > 10 )", shape="diamond", fillcolor="#f9d9d9"];
+  "B5" [label="B5\nl.16: STUDY u FOR 50 HOURS\n[inalcançável]", shape="box", fillcolor="#eeeeee"];
+  "B6" [label="B6\nl.18: STUDY u FOR h + bonus HOURS", shape="box", fillcolor="#dbe9f7"];
+  "B7" [label="B7\nl.20: total = total + h", shape="box", fillcolor="#dbe9f7"];
+  "B8" [label="B8\nl.22: VAR resto = 25 - total", shape="box", fillcolor="#dbe9f7"];
+  "EXIT" [label="EXIT", shape="oval"];
+  "ENTRY" -> "B1" [label=""];
+  "B1" -> "B2" [label=""];
+  "B2" -> "B3" [label="próximo"];
+  "B2" -> "B8" [label="fim"];
+  "B3" -> "B4" [label=""];
+  "B4" -> "B5" [label="V"];
+  "B4" -> "B6" [label="F"];
+  "B5" -> "B7" [label=""];
+  "B6" -> "B7" [label=""];
+  "B7" -> "B2" [label="", color="#c0392b", fontcolor="#c0392b"];
+  "B8" -> "EXIT" [label=""];
+}

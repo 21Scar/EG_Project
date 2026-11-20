@@ -1,6 +1,21 @@
 # EG_Project — StudyLang
 
-Projeto de Engenharia Gramatical 2026/2027, Parte I: Engenharia de Linguagens e Gramáticas.
+Projeto de Engenharia Gramatical 2026/2027.
+
+- **Parte I (Engenharia de Linguagens e Gramáticas):** desenho da linguagem, gramática e gramática de atributos (fases 1–4).
+- **Parte II (Representação, Análise e Integração):** representações intermédias, análise estática, transformações e a ferramenta `studylang.py` (fases 5–7).
+
+## Início rápido
+
+```bash
+pip install -r requirements.txt
+python studylang.py analisar exemplos/ex2_secundario.study
+python studylang.py otimizar exemplos/ex7_analise.study
+python studylang.py relatorio exemplos/ex7_analise.study      # página HTML com tudo
+python -m unittest discover -s tests                          # testes
+```
+
+O guia passo a passo para instalar, testar e rever o projeto está em [COMO_TESTAR.md](COMO_TESTAR.md).
 
 ## 1. A linguagem
 
@@ -52,7 +67,19 @@ PLAN {
 | [fase_4_qualidade.md](fase_4_qualidade.md) | Tarefa 4: qualidade da linguagem, da gramática e da gramática de atributos |
 | [studylang.lark](studylang.lark) | Gramática implementada em Lark (LALR(1)) |
 | [check_studylang.py](check_studylang.py) | Parser e avaliador da gramática de atributos, com os exemplos de teste |
-- **Métricas:** cálculo das métricas da gramática compilada pelo Lark, usadas na fase 4
+| [metricas.py](metricas.py) | Cálculo das métricas da gramática compilada pelo Lark, usadas na fase 4 |
+| [exemplos/](exemplos) | Programas de exemplo (`.study`), partilhados pelas duas partes |
+| **Parte II** | |
+| [fase_5_grafos_e_dependencias.md](fase_5_grafos_e_dependencias.md) | Tarefas 1 e 2: grafos de dependências (gramática e AG), CFG, DFG, PDG, análise estática e diagnósticos |
+| [fase_6_transformacoes.md](fase_6_transformacoes.md) | Tarefa 3: otimização, planificação, exportação e evidência de correção |
+| [fase_7_ferramenta.md](fase_7_ferramenta.md) | Tarefa 4: arquitetura, instalação, uso e demonstração da ferramenta |
+| [ir.py](ir.py) | Representações intermédias: resolução de nomes, CFG, blocos básicos, DFG, PDG, fatias |
+| [analise.py](analise.py) | Análise estática: intervalos, avaliação exata, diagnósticos |
+| [transformacoes.py](transformacoes.py) | Pretty-printer, otimização, planificação e exportação |
+| [grafos.py](grafos.py) | Visualização: gera todos os grafos em `grafos/` e o relatório `grafos/analise.md` |
+| [studylang.py](studylang.py) | Ferramenta de linha de comandos que integra tudo |
+| [tests/](tests) | Testes unitários e de propriedades (programas aleatórios) |
+| [relatorios/](relatorios) | Relatórios HTML já gerados para os exemplos válidos |
 
 ## 3. Especificação lexical e sintática: decisões principais
 
@@ -92,7 +119,7 @@ A gramática é **L-atribuída**: os herdados dependem só do pai e dos irmãos 
 
 ## 5. Como testar
 
-Requer Python 3 e Lark (`pip install lark`).
+Requer Python 3, Lark e NetworkX (`pip install -r requirements.txt`).
 
 ```bash
 python check_studylang.py
@@ -111,7 +138,7 @@ Exemplos incluídos e resultado esperado:
 
 ## 6. Qualidade da linguagem e da gramática
 
-A avaliação completa está na [fase 4](fase_4_qualidade.md), e as métricas são calculadas com `python metricas.py`. A [secção 3.7 de fase_3_especificacao_semantica.md](fase_3_especificacao_semantica.md) contém a versão anterior dessa avaliação. Em resumo:
+A avaliação completa está na [fase 4](fase_4_qualidade.md), e as métricas são calculadas com `python metricas.py`. Em resumo:
 
 **Linguagem**
 - **Pontos fortes:**
@@ -136,27 +163,50 @@ A avaliação completa está na [fase 4](fase_4_qualidade.md), e as métricas s�
 - **Atributos:** 13 (4 herdados e 9 sintetizados) e 20 condições de contexto.
 - **Avaliação:** L-atribuída, numa só passagem, com erros acumulados e reportados na linha que os causa.
 
-## 7. Limitações conhecidas e melhorias possíveis
+## 7. Parte II: representações, análise, transformações e ferramenta
 
-Estas limitações são intencionais nesta primeira versão e são analisadas com mais
-detalhe na secção 4.4 de [fase_4_qualidade.md](fase_4_qualidade.md).
+Toda a Parte II é usada através de `studylang.py` (ver a [fase 7](fase_7_ferramenta.md)):
 
-- **`minHours` é apenas um limite inferior.** Horas que dependem de
-  `u.CREDITS`, `u.DIFFICULTY` ou de variáveis não são contabilizadas como
-  constantes. Assim, o verificador pode não detetar todos os excessos de
-  `RESOURCE TIME`, mas nunca reporta um excesso baseado apenas numa estimativa.
-  Uma melhoria seria fazer propagação de constantes no ambiente.
-- **Divisão por zero parcial.** Só é detetada quando o divisor é uma constante
-  calculável estaticamente, como `10 / 0` ou `5 / (2 - 2)`.
+```bash
+python studylang.py verificar  FICHEIRO               # sintaxe + gramática de atributos (Parte I)
+python studylang.py analisar   FICHEIRO [--md|--json]  # análise estática e diagnósticos
+python studylang.py grafos     FICHEIRO [-o PASTA]     # AST, CFG, DFG, PDG
+python studylang.py otimizar   FICHEIRO [-o SAIDA]     # transformação que preserva o plano
+python studylang.py planificar FICHEIRO [--agregar]    # plano desenrolado
+python studylang.py exportar   FICHEIRO [--formato md|csv|json]
+python studylang.py relatorio  FICHEIRO [-o PASTA]     # página HTML com tudo
+```
+
+- **Representações intermédias ([fase 5](fase_5_grafos_e_dependencias.md)):** CFG por instrução e por blocos básicos, DFG (*reaching definitions*), PDG e *slicing*. `python grafos.py` gera em `grafos/` os 25 grafos dos exemplos, mais os da gramática e da AG (NB07). O ficheiro `grafos/index.html` mostra-os no browser.
+- **Análise estática (fase 5):** as horas do plano são calculadas com a AG (`minHours`), com intervalos (interpretação abstrata) e com avaliação exata. Isto mostra que o Ex2 aloca 21 horas com 20 disponíveis. Os diagnósticos detetam também divisões por zero em tempo de execução, condições constantes, código inalcançável, definições mortas, instruções sem efeito e UCs sem estudo.
+- **Transformações ([fase 6](fase_6_transformacoes.md)):**
+  - otimização (propagação e dobragem de constantes, eliminação de ramos e de código morto);
+  - planificação (avaliação parcial);
+  - exportação para Markdown, CSV ou JSON.
+
+  A correção é verificada pela igualdade do significado, isto é, da sequência de sessões.
+- **Testes:** `python -m unittest discover -s tests` corre 16 testes. Incluem propriedades verificadas em 150 programas válidos gerados aleatoriamente: *pretty-printer* inverso do parser, transformações que preservam o significado e análises sólidas.
+
+## 8. Limitações conhecidas e melhorias possíveis
+
+Estas limitações foram identificadas na Parte I e são analisadas com mais
+detalhe na secção 4.4 de [fase_4_qualidade.md](fase_4_qualidade.md). As que
+estão resolvidas foram tratadas na Parte II.
+
+- **`minHours` é apenas um limite inferior.** *Resolvido na Parte II:* a
+  análise estática calcula as horas exatas e assinala o excesso (diagnóstico
+  `HORAS`). A planificação torna a P11 da AG exata.
+- **Divisão por zero parcial.** A AG só a deteta com divisores constantes. *Na
+  Parte II:* a avaliação exata deteta também as que só acontecem em tempo de
+  execução (`DIV_ZERO`).
 - **Apenas números inteiros.** A linguagem não tem números decimais, durações
   tipadas, datas ou calendários.
 - **Sem dimensão temporal.** Não existem dias, semanas, limites diários ou
   pré-requisitos entre UCs.
 - **Expressividade sintática limitada.** `STUDY` por nome aceita apenas
   *strings* literais e as condições não aceitam parênteses de agrupamento.
-- **Mensagens de erro sintático.** O parser indica a posição do erro, mas ainda
-  não mostra os tokens esperados. O erro de um `RESOURCE` duplicado também pode
-  ser melhor associado à declaração concreta.
-
-Estas limitações não são falhas ocultas: fazem parte da avaliação crítica da
-linguagem e indicam extensões naturais para a Parte II.
+- **Mensagens de erro sintático.** *Resolvido na Parte II:* a ferramenta
+  indica a posição e os tokens esperados.
+- **Limitações da análise estática:** ver a secção 5.7 da
+  [fase 5](fase_5_grafos_e_dependencias.md). Os intervalos não são relacionais,
+  e a avaliação exata pressupõe programas fechados.

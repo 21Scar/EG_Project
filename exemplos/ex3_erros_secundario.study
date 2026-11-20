@@ -1,0 +1,24 @@
+STUDENT Ana LEVEL SECONDARY
+
+UC "Matematica" { CREDITS 6 DIFFICULTY 4 }      // ERRO 1: CREDITS no secundario
+UC "Matematica" { DIFFICULTY 2 }                // ERRO 2: UC repetida
+
+RESOURCE TIME 5 HOURS
+
+PLAN {
+    STUDY "Matematica" FOR 10 HOURS             // ERRO 3: 10 > 5 horas disponiveis
+    STUDY "Fisica" FOR 2 HOURS                  // ERRO 4: UC nao declarada
+    total = 3                                   // ERRO 5: variavel nao declarada
+
+    VAR x = 1
+    VAR x = 2                                   // ERRO 6: redeclaracao no mesmo bloco
+
+    IF ( x > 0 ) { VAR y = 4 }
+    VAR z = y + 1                               // ERRO 7: y fora do ambito
+
+    FOR EACH u IN [ "Matematica" ] {
+        VAR w = u.CREDITS                       // ERRO 8: CREDITS no secundario
+    }
+    VAR w2 = x.DIFFICULTY                       // ERRO 9: x nao e uma UC
+    VAR d = 10 / 0                              // ERRO 10: divisao por zero constante
+}

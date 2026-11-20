@@ -1,0 +1,24 @@
+digraph "ex2_dfg" {
+  rankdir=TB;
+  compound=true;
+  node [fontname="Helvetica", fontsize=11, style=filled, fillcolor="white"];
+  edge [fontname="Helvetica", fontsize=9];
+  "S6" [label="S6 (l.8)\nVAR base = 2", shape="box", fillcolor="#dbe9f7", style="filled"];
+  "S7" [label="S7 (l.11)\nVAR extra = 1", shape="box", fillcolor="#dbe9f7", style="filled"];
+  "S8" [label="S8 (l.12)\nFOR EACH u IN [\"Matematica A\", \"Fisica\", \"Portugues\"]", shape="box", fillcolor="#e6dcf5", style="filled"];
+  "S9" [label="S9 (l.13)\nVAR h = base + u.DIFFICULTY", shape="box", fillcolor="#dbe9f7", style="filled"];
+  "S10" [label="S10 (l.14)\nIF ( u.DIFFICULTY >= 4 )", shape="box", fillcolor="#f9d9d9", style="filled"];
+  "S11" [label="S11 (l.15)\nVAR extra = 2", shape="box", fillcolor="#dbe9f7", style="filled"];
+  "S12" [label="S12 (l.16)\nSTUDY u FOR h + extra HOURS", shape="box", fillcolor="#dbe9f7", style="filled"];
+  "S13" [label="S13 (l.18)\nSTUDY u FOR h HOURS", shape="box", fillcolor="#dbe9f7", style="filled"];
+  "S14" [label="S14 (l.21)\nextra = extra + 1", shape="box", fillcolor="#eeeeee", style="filled,dashed"];
+  "S6" -> "S9" [label="base"];
+  "S7" -> "S14" [label="extra@11"];
+  "S8" -> "S10" [label="u"];
+  "S8" -> "S12" [label="u"];
+  "S8" -> "S13" [label="u"];
+  "S8" -> "S9" [label="u"];
+  "S9" -> "S12" [label="h"];
+  "S9" -> "S13" [label="h"];
+  "S11" -> "S12" [label="extra@15"];
+}
