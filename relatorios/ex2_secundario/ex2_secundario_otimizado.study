@@ -1,0 +1,18 @@
+STUDENT Joao LEVEL SECONDARY
+
+UC "Matematica A" { DIFFICULTY 5 }
+UC "Fisica" { DIFFICULTY 4 }
+UC "Portugues" { DIFFICULTY 2 }
+
+RESOURCE TIME 20 HOURS
+
+PLAN {
+    FOR EACH u IN [ "Matematica A", "Fisica", "Portugues" ] {
+        VAR h = 2 + u.DIFFICULTY
+        IF ( u.DIFFICULTY >= 4 ) {
+            STUDY u FOR h + 2 HOURS
+        } ELSE {
+            STUDY u FOR h HOURS
+        }
+    }
+}

@@ -1,0 +1,13 @@
+STUDENT Leonor LEVEL UNIVERSITY
+
+UC "Sistemas Distribuidos" { CREDITS 6 DIFFICULTY 4 }
+UC "Engenharia Gramatical" { CREDITS 6 DIFFICULTY 5 }
+UC "Redes" { CREDITS 3 DIFFICULTY 2 }
+
+RESOURCE TIME 30 HOURS
+
+PLAN {
+    STUDY "Sistemas Distribuidos" FOR 12 HOURS
+    STUDY "Engenharia Gramatical" FOR 12 HOURS
+    STUDY "Redes" FOR 5 HOURS
+}

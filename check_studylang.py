@@ -244,97 +244,18 @@ def run(title, src):
 
 
 # --------------------------------------------------------------------------
-# Exemplos
+# Exemplos (em exemplos/*.study, partilhados com as ferramentas da Parte II)
 # --------------------------------------------------------------------------
-EX1_UNI = '''STUDENT Leonor LEVEL UNIVERSITY
+def _ex(name):
+    return (HERE / "exemplos" / name).read_text(encoding="utf-8")
 
-UC "Sistemas Distribuidos" { CREDITS 6 DIFFICULTY 4 }
-UC "Engenharia Gramatical" { CREDITS 6 DIFFICULTY 5 }
-UC "Redes"                 { CREDITS 3 DIFFICULTY 2 }
 
-RESOURCE TIME 30 HOURS
-VAR max_session = 4
-
-PLAN {
-    FOR EACH u IN [ "Sistemas Distribuidos", "Engenharia Gramatical", "Redes" ] {
-        VAR h = u.CREDITS * 2
-        IF ( u.DIFFICULTY > 3 AND h <= max_session * 3 ) {
-            STUDY u FOR h HOURS
-        } ELSE IF ( u.CREDITS < 4 OR NOT u.DIFFICULTY > 2 ) {
-            STUDY u FOR 2 HOURS
-        } ELSE {
-            STUDY u FOR max_session HOURS
-        }
-    }
-    STUDY "Redes" FOR 3 HOURS
-}
-'''
-
-EX2_SEC = '''STUDENT Joao LEVEL SECONDARY
-
-UC "Matematica A" { DIFFICULTY 5 }
-UC "Fisica"       { DIFFICULTY 4 }
-UC "Portugues"    { DIFFICULTY 2 }
-
-RESOURCE TIME 20 HOURS
-VAR base = 2                          // variavel global
-
-PLAN {
-    VAR extra = 1                     // local ao PLAN
-    FOR EACH u IN [ "Matematica A", "Fisica", "Portugues" ] {
-        VAR h = base + u.DIFFICULTY   // local ao corpo do ciclo
-        IF ( u.DIFFICULTY >= 4 ) {
-            VAR extra = 2             // shadowing permitido num bloco interior
-            STUDY u FOR h + extra HOURS
-        } ELSE {
-            STUDY u FOR h HOURS
-        }
-    }
-    extra = extra + 1
-}
-'''
-
-EX3_INVALID_SEC = '''STUDENT Ana LEVEL SECONDARY
-
-UC "Matematica" { CREDITS 6 DIFFICULTY 4 }      // ERRO 1: CREDITS no secundario
-UC "Matematica" { DIFFICULTY 2 }                // ERRO 2: UC repetida
-
-RESOURCE TIME 5 HOURS
-
-PLAN {
-    STUDY "Matematica" FOR 10 HOURS             // ERRO 3: 10 > 5 horas disponiveis
-    STUDY "Fisica" FOR 2 HOURS                  // ERRO 4: UC nao declarada
-    total = 3                                   // ERRO 5: variavel nao declarada
-
-    VAR x = 1
-    VAR x = 2                                   // ERRO 6: redeclaracao no mesmo bloco
-
-    IF ( x > 0 ) { VAR y = 4 }
-    VAR z = y + 1                               // ERRO 7: y fora do ambito
-
-    FOR EACH u IN [ "Matematica" ] {
-        VAR w = u.CREDITS                       // ERRO 8: CREDITS no secundario
-    }
-    VAR w2 = x.DIFFICULTY                       // ERRO 9: x nao e uma UC
-    VAR d = 10 / 0                              // ERRO 10: divisao por zero constante
-}
-'''
-
-EX4_INVALID_UNI = '''STUDENT Rui LEVEL UNIVERSITY
-UC "Redes" { DIFFICULTY 3 }                     // ERRO: falta CREDITS no universitario
-RESOURCE TIME 10 HOURS
-RESOURCE TIME 12 HOURS                          // ERRO: dois RESOURCE
-PLAN { STUDY "Redes" FOR 0 HOURS }              // ERRO: horas nao positivas
-'''
-
-KEYWORD_AS_NAME = '''STUDENT Rui LEVEL SECONDARY
-PLAN { VAR STUDY = 1 }
-'''   # palavra reservada usada como nome
-
-SYNTAX_ERR = '''STUDENT Rui
-UC "Redes" { CREDITS 3 DIFFICULTY 3 }
-PLAN { }
-'''   # falta LEVEL
+EX1_UNI = _ex("ex1_universitario.study")
+EX2_SEC = _ex("ex2_secundario.study")
+EX3_INVALID_SEC = _ex("ex3_erros_secundario.study")
+EX4_INVALID_UNI = _ex("ex4_erros_universitario.study")
+SYNTAX_ERR = _ex("ex5_erro_sintatico.study")          # falta LEVEL
+KEYWORD_AS_NAME = _ex("ex6_palavra_reservada.study")  # palavra reservada usada como nome
 
 if __name__ == "__main__":
     for t, s in [("Ex1 - universitário (válido)", EX1_UNI),

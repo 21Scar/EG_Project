@@ -1,0 +1,23 @@
+STUDENT Marta LEVEL UNIVERSITY
+
+UC "Algebra"  { CREDITS 6 DIFFICULTY 5 }
+UC "Historia" { CREDITS 3 DIFFICULTY 1 }
+
+RESOURCE TIME 25 HOURS
+VAR base = 2
+VAR bonus = 10                        // nunca lida: redefinida antes de qualquer uso
+
+PLAN {
+    VAR total = 0
+    bonus = 1                         // dependência de saída com a linha 8
+    FOR EACH u IN [ "Algebra", "Historia" ] {
+        VAR h = base * u.DIFFICULTY
+        IF ( base > 10 ) {            // sempre falsa: base é a constante 2
+            STUDY u FOR 50 HOURS      // inalcançável
+        } ELSE {
+            STUDY u FOR h + bonus HOURS
+        }
+        total = total + h             // dependência transportada pelo ciclo
+    }
+    VAR resto = 25 - total            // nunca lida
+}

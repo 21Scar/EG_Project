@@ -1,0 +1,29 @@
+digraph "ex7_analise_dfg" {
+  rankdir=TB;
+  compound=true;
+  node [fontname="Helvetica", fontsize=11, style=filled, fillcolor="white"];
+  edge [fontname="Helvetica", fontsize=9];
+  "S5" [label="S5 (l.7)\nVAR base = 2", shape="box", fillcolor="#dbe9f7", style="filled"];
+  "S6" [label="S6 (l.8)\nVAR bonus = 10", shape="box", fillcolor="#eeeeee", style="filled,dashed"];
+  "S7" [label="S7 (l.11)\nVAR total = 0", shape="box", fillcolor="#dbe9f7", style="filled"];
+  "S8" [label="S8 (l.12)\nbonus = 1", shape="box", fillcolor="#dbe9f7", style="filled"];
+  "S9" [label="S9 (l.13)\nFOR EACH u IN [\"Algebra\", \"Historia\"]", shape="box", fillcolor="#e6dcf5", style="filled"];
+  "S10" [label="S10 (l.14)\nVAR h = base * u.DIFFICULTY", shape="box", fillcolor="#dbe9f7", style="filled"];
+  "S11" [label="S11 (l.15)\nIF ( base > 10 )", shape="box", fillcolor="#f9d9d9", style="filled"];
+  "S12" [label="S12 (l.16)\nSTUDY u FOR 50 HOURS", shape="box", fillcolor="#dbe9f7", style="filled"];
+  "S13" [label="S13 (l.18)\nSTUDY u FOR h + bonus HOURS", shape="box", fillcolor="#dbe9f7", style="filled"];
+  "S14" [label="S14 (l.20)\ntotal = total + h", shape="box", fillcolor="#dbe9f7", style="filled"];
+  "S15" [label="S15 (l.22)\nVAR resto = 25 - total", shape="box", fillcolor="#eeeeee", style="filled,dashed"];
+  "S5" -> "S10" [label="base"];
+  "S5" -> "S11" [label="base"];
+  "S7" -> "S14" [label="total"];
+  "S7" -> "S15" [label="total"];
+  "S8" -> "S13" [label="bonus"];
+  "S9" -> "S10" [label="u"];
+  "S9" -> "S12" [label="u"];
+  "S9" -> "S13" [label="u"];
+  "S10" -> "S13" [label="h"];
+  "S10" -> "S14" [label="h"];
+  "S14" -> "S14" [label="total"];
+  "S14" -> "S15" [label="total"];
+}
