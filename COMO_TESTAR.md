@@ -27,7 +27,7 @@ $env:PYTHONIOENCODING="utf-8"
 ## Passo 1: verificador da Parte I
 
 ```bash
-python check_studylang.py
+python studylang.py exemplos
 ```
 
 **Resultado esperado:**
@@ -128,34 +128,34 @@ Os formatos disponíveis são `md`, `csv` e `json`.
 python studylang.py relatorio exemplos/ex7_analise.study
 ```
 
-A página fica em `relatorio_ex7_analise/index.html`. Para a abrir:
+A página fica em `resultados/relatorios/ex7_analise/index.html`. Para a abrir:
 
 ```powershell
-start relatorio_ex7_analise/index.html        # Windows
+start resultados/relatorios/ex7_analise/index.html        # Windows
 ```
 
 ```bash
-xdg-open relatorio_ex7_analise/index.html     # Linux  (macOS: open ...)
+xdg-open resultados/relatorios/ex7_analise/index.html     # Linux  (macOS: open ...)
 ```
 
-**O que observar:** o programa, os diagnósticos, a tabela das horas, o código otimizado e planificado lado a lado, e os grafos AST, CFG, DFG e PDG. Os relatórios dos três exemplos válidos já estão gerados na pasta `relatorios/`.
+**O que observar:** o programa, os diagnósticos, a tabela das horas, o código otimizado e planificado lado a lado, e os grafos AST, CFG, DFG e PDG. Os relatórios dos três exemplos válidos já estão gerados na pasta `resultados/relatorios/`.
 
 ---
 
 ## Passo 3: todos os grafos (gramática, gramática de atributos e programas)
 
 ```bash
-python grafos.py
+python studylang.py grafos-todos
 ```
 
-Depois abre `grafos/index.html` no browser, da mesma forma que no passo 2 f).
+Depois abre `resultados/grafos/index.html` no browser, da mesma forma que no passo 2 f).
 
 São 25 grafos ao todo:
 - o grafo de dependências da gramática;
 - os grafos de dependências da gramática de atributos;
 - para os exemplos Ex1, Ex2 e Ex7: AST, CFG, CFG por blocos básicos, DFG e PDG.
 
-O ficheiro `grafos/analise.md` tem as tabelas e os números. A interpretação está em [fase_5_grafos_e_dependencias.md](fase_5_grafos_e_dependencias.md).
+O ficheiro `resultados/grafos/analise.md` tem as tabelas e os números. A interpretação está em [docs/parte2/5_grafos_e_analise_estatica.md](docs/parte2/5_grafos_e_analise_estatica.md).
 
 ---
 
@@ -208,15 +208,15 @@ Na experiência 4 corre também `python studylang.py otimizar teste.study`. O re
 
 ## Passo 6: ler o código
 
-Recomenda-se esta ordem, porque cada ficheiro usa os anteriores. A arquitetura está descrita em [fase_7_ferramenta.md](fase_7_ferramenta.md).
+Recomenda-se esta ordem, porque cada ficheiro usa os anteriores. A arquitetura está descrita em [docs/parte2/7_ferramenta.md](docs/parte2/7_ferramenta.md).
 
 | Ordem | Ficheiro | Papel | O que ler |
 |---|---|---|---|
-| 1 | [studylang.lark](studylang.lark) e [check_studylang.py](check_studylang.py) | Parte I: parser e gramática de atributos | as regras da gramática; `check`, `block`, `expr` |
-| 2 | [ir.py](ir.py) | Representações intermédias | `resolve` (liga nomes a declarações, como o `env` da AG); `Program`; `build_cfg`; `basic_blocks`; `dataflow` e `reaching_definitions` (ponto fixo); `pdg` e `slices` |
-| 3 | [analise.py](analise.py) | Análise estática | `Interp` (modos `exact`, `interval` e `nocond`); `analyse`; `diagnostics` |
-| 4 | [transformacoes.py](transformacoes.py) | Transformações | `pretty`; `meaning` (definição de "mesmo significado"); `_fold_pass` e `_dce_pass` (os dois passos do otimizador); `optimize`; `flatten`; `export` |
-| 5 | [grafos.py](grafos.py) | Visualização | conversão para DOT e página HTML; grafos da gramática e da AG |
+| 1 | [parte1/gramatica.lark](parte1/gramatica.lark) e [parte1/verificador.py](parte1/verificador.py) | Parte I: parser e gramática de atributos | as regras da gramática; `check`, `block`, `expr` |
+| 2 | [parte2/representacoes_intermedias.py](parte2/representacoes_intermedias.py) | Representações intermédias | `resolve` (liga nomes a declarações, como o `env` da AG); `Program`; `build_cfg`; `basic_blocks`; `dataflow` e `reaching_definitions` (ponto fixo); `pdg` e `slices` |
+| 3 | [parte2/analise_estatica.py](parte2/analise_estatica.py) | Análise estática | `Interp` (modos `exact`, `interval` e `nocond`); `analyse`; `diagnostics` |
+| 4 | [parte2/transformacoes.py](parte2/transformacoes.py) | Transformações | `pretty`; `meaning` (definição de "mesmo significado"); `_fold_pass` e `_dce_pass` (os dois passos do otimizador); `optimize`; `flatten`; `export` |
+| 5 | [parte2/visualizacao.py](parte2/visualizacao.py) | Visualização | conversão para DOT e página HTML; grafos da gramática e da AG |
 | 6 | [studylang.py](studylang.py) | Interface | uma função `cmd_*` por comando, cada uma só chama os módulos anteriores |
 | 7 | [tests/test_studylang.py](tests/test_studylang.py) | Testes | `Gen` (gerador de programas aleatórios) e `TestPropriedades` |
 
@@ -227,7 +227,7 @@ Recomenda-se esta ordem, porque cada ficheiro usa os anteriores. A arquitetura e
 | Ficheiro | Conteúdo |
 |---|---|
 | [README.md](README.md) | Visão geral do projeto |
-| [fase_1_desenho_da_linguagem.md](fase_1_desenho_da_linguagem.md) a [fase_4_qualidade.md](fase_4_qualidade.md) | Parte I: desenho, gramática, gramática de atributos e qualidade |
-| [fase_5_grafos_e_dependencias.md](fase_5_grafos_e_dependencias.md) | Representações intermédias, análise estática e diagnósticos |
-| [fase_6_transformacoes.md](fase_6_transformacoes.md) | Transformações e evidência de correção |
-| [fase_7_ferramenta.md](fase_7_ferramenta.md) | Arquitetura, utilização e demonstração |
+| [docs/parte1/1_desenho_da_linguagem.md](docs/parte1/1_desenho_da_linguagem.md) a [docs/parte1/4_qualidade.md](docs/parte1/4_qualidade.md) | Parte I: desenho, gramática, gramática de atributos e qualidade |
+| [docs/parte2/5_grafos_e_analise_estatica.md](docs/parte2/5_grafos_e_analise_estatica.md) | Representações intermédias, análise estática e diagnósticos |
+| [docs/parte2/6_transformacoes.md](docs/parte2/6_transformacoes.md) | Transformações e evidência de correção |
+| [docs/parte2/7_ferramenta.md](docs/parte2/7_ferramenta.md) | Arquitetura, utilização e demonstração |

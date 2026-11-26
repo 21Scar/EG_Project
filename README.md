@@ -2,20 +2,68 @@
 
 Projeto de Engenharia Gramatical 2026/2027.
 
-- **Parte I (Engenharia de Linguagens e Gramáticas):** desenho da linguagem, gramática e gramática de atributos (fases 1–4).
-- **Parte II (Representação, Análise e Integração):** representações intermédias, análise estática, transformações e a ferramenta `studylang.py` (fases 5–7).
+A **StudyLang** é uma linguagem para escrever **planos de estudo**. O aluno declara as suas UCs e o tempo disponível e escreve como distribui as horas. O projeto tem duas partes:
+
+- **Parte I: a linguagem.** Gramática, regras de validação (gramática de atributos) e qualidade.
+- **Parte II: a ferramenta.** Cada plano é convertido em **grafos** (fluxo de controlo, fluxo de dados), que são percorridos para **validar** o plano (horas reais, código inútil, instruções impossíveis) e para o **transformar** (otimizar, planificar, exportar).
+
+## Mapa do projeto
+
+```text
+EG_Project/
+│
+├── studylang.py           ← A FERRAMENTA: é o único ficheiro que se corre (python studylang.py --help)
+├── COMO_TESTAR.md         ← guia passo a passo para testar e rever o projeto
+├── requirements.txt       ← dependências (pip install -r requirements.txt)
+│
+├── parte1/                ← CÓDIGO DA PARTE I: a linguagem
+│   ├── gramatica.lark          sintaxe da StudyLang
+│   ├── verificador.py          parser + gramática de atributos (regras P1–P11)
+│   └── metricas_gramatica.py   métricas de qualidade da gramática
+│
+├── parte2/                ← CÓDIGO DA PARTE II: grafos, validação e transformações
+│   ├── representacoes_intermedias.py   constrói os grafos de cada plano (CFG, DFG, PDG)
+│   ├── analise_estatica.py             valida o plano percorrendo os grafos
+│   ├── transformacoes.py               otimizar, planificar e exportar planos
+│   └── visualizacao.py                 desenha os grafos (ficheiros DOT + página HTML)
+│
+├── exemplos/              ← planos de exemplo (.study) usados nas duas partes
+├── tests/                 ← testes automáticos (python -m unittest discover -s tests)
+│
+├── docs/                  ← O RELATÓRIO, por secções
+│   ├── parte1/   1_desenho_da_linguagem · 2_lexico_e_sintaxe · 3_semantica_gramatica_de_atributos · 4_qualidade
+│   └── parte2/   5_grafos_e_analise_estatica · 6_transformacoes · 7_ferramenta
+│
+└── resultados/            ← FICHEIROS GERADOS (não se editam à mão)
+    ├── grafos/            todos os grafos + index.html para os ver no browser
+    └── relatorios/        uma página HTML por exemplo, com análise, transformações e grafos
+```
+
+## Onde está cada tarefa do enunciado
+
+| Tarefa | Documento | Código |
+|---|---|---|
+| **Parte I.1** Desenho da linguagem | [docs/parte1/1_desenho_da_linguagem.md](docs/parte1/1_desenho_da_linguagem.md) | [exemplos/](exemplos) |
+| **Parte I.2** Léxico e sintaxe | [docs/parte1/2_lexico_e_sintaxe.md](docs/parte1/2_lexico_e_sintaxe.md) | [parte1/gramatica.lark](parte1/gramatica.lark) |
+| **Parte I.3** Semântica (gramática de atributos) | [docs/parte1/3_semantica_gramatica_de_atributos.md](docs/parte1/3_semantica_gramatica_de_atributos.md) | [parte1/verificador.py](parte1/verificador.py) |
+| **Parte I.4** Qualidade | [docs/parte1/4_qualidade.md](docs/parte1/4_qualidade.md) | [parte1/metricas_gramatica.py](parte1/metricas_gramatica.py) |
+| **Parte II.1** Representações intermédias (grafos) | [docs/parte2/5_grafos_e_analise_estatica.md](docs/parte2/5_grafos_e_analise_estatica.md) | [parte2/representacoes_intermedias.py](parte2/representacoes_intermedias.py) |
+| **Parte II.2** Análise estática (validação) | [docs/parte2/5_grafos_e_analise_estatica.md](docs/parte2/5_grafos_e_analise_estatica.md) (5.4–5.7) | [parte2/analise_estatica.py](parte2/analise_estatica.py) |
+| **Parte II.3** Transformações | [docs/parte2/6_transformacoes.md](docs/parte2/6_transformacoes.md) | [parte2/transformacoes.py](parte2/transformacoes.py) |
+| **Parte II.4** Ferramenta integrada | [docs/parte2/7_ferramenta.md](docs/parte2/7_ferramenta.md) | [studylang.py](studylang.py) |
 
 ## Início rápido
 
 ```bash
 pip install -r requirements.txt
-python studylang.py analisar exemplos/ex2_secundario.study
-python studylang.py otimizar exemplos/ex7_analise.study
+python studylang.py exemplos                                  # Parte I: verificador sobre os exemplos
+python studylang.py analisar exemplos/ex2_secundario.study    # Parte II: validação com os grafos
+python studylang.py otimizar exemplos/ex7_analise.study       # Parte II: transformação
 python studylang.py relatorio exemplos/ex7_analise.study      # página HTML com tudo
 python -m unittest discover -s tests                          # testes
 ```
 
-O guia passo a passo para instalar, testar e rever o projeto está em [COMO_TESTAR.md](COMO_TESTAR.md).
+O guia completo para instalar, testar e rever o projeto está em [COMO_TESTAR.md](COMO_TESTAR.md).
 
 ## 1. A linguagem
 
@@ -55,33 +103,9 @@ PLAN {
 | Expressões e estado | aritmética inteira (`+ - * /`, `-` unário, parênteses), `u.CREDITS` / `u.DIFFICULTY`, atribuição |
 | Construções aninhadas | blocos `{ }` dentro de `PLAN`, `IF` e `FOR EACH` |
 | Ramificação e repetição | `IF / ELSE IF / ELSE` e `FOR EACH` |
-| Semântica não sintática | 11 propriedades verificadas pela gramática de atributos (secção 4) |
+| Semântica não sintática | 11 propriedades verificadas pela gramática de atributos (secção 3) |
 
-## 2. Estrutura do repositório
-
-| Ficheiro | Conteúdo |
-|---|---|
-| [fase_1_desenho_da_linguagem.md](fase_1_desenho_da_linguagem.md) | Tarefa 1: domínio, propósito, conceitos e exemplos de programas |
-| [fase_2_especifica_o_lexical_e_sint_tica.md](fase_2_especifica_o_lexical_e_sint_tica.md) | Tarefa 2: léxico, gramática em EBNF e decisões de desenho |
-| [fase_3_especificacao_semantica.md](fase_3_especificacao_semantica.md) | Tarefa 3: propriedades semânticas e gramática de atributos |
-| [fase_4_qualidade.md](fase_4_qualidade.md) | Tarefa 4: qualidade da linguagem, da gramática e da gramática de atributos |
-| [studylang.lark](studylang.lark) | Gramática implementada em Lark (LALR(1)) |
-| [check_studylang.py](check_studylang.py) | Parser e avaliador da gramática de atributos, com os exemplos de teste |
-| [metricas.py](metricas.py) | Cálculo das métricas da gramática compilada pelo Lark, usadas na fase 4 |
-| [exemplos/](exemplos) | Programas de exemplo (`.study`), partilhados pelas duas partes |
-| **Parte II** | |
-| [fase_5_grafos_e_dependencias.md](fase_5_grafos_e_dependencias.md) | Tarefas 1 e 2: grafos de dependências (gramática e AG), CFG, DFG, PDG, análise estática e diagnósticos |
-| [fase_6_transformacoes.md](fase_6_transformacoes.md) | Tarefa 3: otimização, planificação, exportação e evidência de correção |
-| [fase_7_ferramenta.md](fase_7_ferramenta.md) | Tarefa 4: arquitetura, instalação, uso e demonstração da ferramenta |
-| [ir.py](ir.py) | Representações intermédias: resolução de nomes, CFG, blocos básicos, DFG, PDG, fatias |
-| [analise.py](analise.py) | Análise estática: intervalos, avaliação exata, diagnósticos |
-| [transformacoes.py](transformacoes.py) | Pretty-printer, otimização, planificação e exportação |
-| [grafos.py](grafos.py) | Visualização: gera todos os grafos em `grafos/` e o relatório `grafos/analise.md` |
-| [studylang.py](studylang.py) | Ferramenta de linha de comandos que integra tudo |
-| [tests/](tests) | Testes unitários e de propriedades (programas aleatórios) |
-| [relatorios/](relatorios) | Relatórios HTML já gerados para os exemplos válidos |
-
-## 3. Especificação lexical e sintática: decisões principais
+## 2. Especificação lexical e sintática: decisões principais
 
 - **Uma só gramática para os dois níveis.** `CREDITS` é opcional na sintaxe. A obrigação (universitário) ou a proibição (secundário) é verificada na semântica, que conhece o nível. Assim, não precisamos de duas gramáticas.
 - **Sem *dangling else*.** Os corpos de `IF`/`ELSE` são sempre blocos com chavetas, e o `ELSE IF` é `ELSE` seguido de um `if_stmt`.
@@ -91,7 +115,7 @@ PLAN {
 - **Lexer `basic`.** Com o lexer contextual (o *default*), uma palavra reservada seria aceite como nome (`VAR STUDY = 1`). Com o `basic`, as palavras reservadas são de facto reservadas.
 - **Comentários** de linha `//` e espaços em branco são ignorados.
 
-## 4. Especificação semântica (gramática de atributos)
+## 3. Especificação semântica (gramática de atributos)
 
 Propriedades verificadas:
 
@@ -115,14 +139,14 @@ Propriedades verificadas:
 
 `minHours` é um limite inferior das horas que o plano aloca com certeza: só conta valores constantes, por isso a verificação P11 nunca dá falsos positivos.
 
-A gramática é **L-atribuída**: os herdados dependem só do pai e dos irmãos à esquerda. Por isso, todos os atributos são avaliados numa única passagem em profundidade, da esquerda para a direita. O `check_studylang.py` implementa essa passagem com funções recursivas, uma por grupo de produções. Não usámos o `LarkAG`. A correspondência entre regras e funções está na secção 3.6 da fase 3.
+A gramática é **L-atribuída**: os herdados dependem só do pai e dos irmãos à esquerda. Por isso, todos os atributos são avaliados numa única passagem em profundidade, da esquerda para a direita. O `parte1/verificador.py` implementa essa passagem com funções recursivas, uma por grupo de produções. Não usámos o `LarkAG`. A correspondência entre regras e funções está na secção 3.6 da fase 3.
 
-## 5. Como testar
+## 4. Como testar
 
 Requer Python 3, Lark e NetworkX (`pip install -r requirements.txt`).
 
 ```bash
-python check_studylang.py
+python studylang.py exemplos
 ```
 
 Exemplos incluídos e resultado esperado:
@@ -130,15 +154,15 @@ Exemplos incluídos e resultado esperado:
 | Exemplo | Resultado |
 |---|---|
 | Ex1: universitário | válido |
-| Ex2: secundário (âmbitos e *shadowing*) | válido |
+| Ex2: secundário (âmbitos e *shadowing*) | válido para a AG (a análise da Parte II mostra que excede as horas) |
 | Ex3: secundário | 10 erros semânticos detetados (P1, P3, P4, P5, P6, P7, P9, P11) |
 | Ex4: universitário | 3 erros detetados (falta `CREDITS`, segundo `RESOURCE` na linha 4, 0 horas) |
 | Ex5: falta `LEVEL` | erro sintático |
 | Ex6: `VAR STUDY = 1` | erro sintático (palavra reservada usada como nome) |
 
-## 6. Qualidade da linguagem e da gramática
+## 5. Qualidade da linguagem e da gramática
 
-A avaliação completa está na [fase 4](fase_4_qualidade.md), e as métricas são calculadas com `python metricas.py`. Em resumo:
+A avaliação completa está na [fase 4](docs/parte1/4_qualidade.md), e as métricas são calculadas com `python studylang.py metricas`. Em resumo:
 
 **Linguagem**
 - **Pontos fortes:**
@@ -163,9 +187,9 @@ A avaliação completa está na [fase 4](fase_4_qualidade.md), e as métricas s�
 - **Atributos:** 13 (4 herdados e 9 sintetizados) e 20 condições de contexto.
 - **Avaliação:** L-atribuída, numa só passagem, com erros acumulados e reportados na linha que os causa.
 
-## 7. Parte II: representações, análise, transformações e ferramenta
+## 6. Parte II: representações, análise, transformações e ferramenta
 
-Toda a Parte II é usada através de `studylang.py` (ver a [fase 7](fase_7_ferramenta.md)):
+Toda a Parte II é usada através de `studylang.py` (ver a [fase 7](docs/parte2/7_ferramenta.md)):
 
 ```bash
 python studylang.py verificar  FICHEIRO               # sintaxe + gramática de atributos (Parte I)
@@ -177,9 +201,9 @@ python studylang.py exportar   FICHEIRO [--formato md|csv|json]
 python studylang.py relatorio  FICHEIRO [-o PASTA]     # página HTML com tudo
 ```
 
-- **Representações intermédias ([fase 5](fase_5_grafos_e_dependencias.md)):** CFG por instrução e por blocos básicos, DFG (*reaching definitions*), PDG e *slicing*. `python grafos.py` gera em `grafos/` os 25 grafos dos exemplos, mais os da gramática e da AG (NB07). O ficheiro `grafos/index.html` mostra-os no browser.
+- **Representações intermédias ([fase 5](docs/parte2/5_grafos_e_analise_estatica.md)):** CFG por instrução e por blocos básicos, DFG (*reaching definitions*), PDG e *slicing*. `python studylang.py grafos-todos` gera em `resultados/grafos/` os 25 grafos dos exemplos, mais os da gramática e da AG (NB07). O ficheiro `resultados/grafos/index.html` mostra-os no browser.
 - **Análise estática (fase 5):** as horas do plano são calculadas com a AG (`minHours`), com intervalos (interpretação abstrata) e com avaliação exata. Isto mostra que o Ex2 aloca 21 horas com 20 disponíveis. Os diagnósticos detetam também divisões por zero em tempo de execução, condições constantes, código inalcançável, definições mortas, instruções sem efeito e UCs sem estudo.
-- **Transformações ([fase 6](fase_6_transformacoes.md)):**
+- **Transformações ([fase 6](docs/parte2/6_transformacoes.md)):**
   - otimização (propagação e dobragem de constantes, eliminação de ramos e de código morto);
   - planificação (avaliação parcial);
   - exportação para Markdown, CSV ou JSON.
@@ -187,10 +211,10 @@ python studylang.py relatorio  FICHEIRO [-o PASTA]     # página HTML com tudo
   A correção é verificada pela igualdade do significado, isto é, da sequência de sessões.
 - **Testes:** `python -m unittest discover -s tests` corre 16 testes. Incluem propriedades verificadas em 150 programas válidos gerados aleatoriamente: *pretty-printer* inverso do parser, transformações que preservam o significado e análises sólidas.
 
-## 8. Limitações conhecidas e melhorias possíveis
+## 7. Limitações conhecidas e melhorias possíveis
 
 Estas limitações foram identificadas na Parte I e são analisadas com mais
-detalhe na secção 4.4 de [fase_4_qualidade.md](fase_4_qualidade.md). As que
+detalhe na secção 4.4 de [docs/parte1/4_qualidade.md](docs/parte1/4_qualidade.md). As que
 estão resolvidas foram tratadas na Parte II.
 
 - **`minHours` é apenas um limite inferior.** *Resolvido na Parte II:* a
@@ -208,5 +232,5 @@ estão resolvidas foram tratadas na Parte II.
 - **Mensagens de erro sintático.** *Resolvido na Parte II:* a ferramenta
   indica a posição e os tokens esperados.
 - **Limitações da análise estática:** ver a secção 5.7 da
-  [fase 5](fase_5_grafos_e_dependencias.md). Os intervalos não são relacionais,
+  [fase 5](docs/parte2/5_grafos_e_analise_estatica.md). Os intervalos não são relacionais,
   e a avaliação exata pressupõe programas fechados.

@@ -16,10 +16,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-import analise  # noqa: E402
-import check_studylang as cs  # noqa: E402
-import ir  # noqa: E402
-import transformacoes as T  # noqa: E402
+from parte1 import verificador as cs  # noqa: E402
+from parte2 import analise_estatica as analise  # noqa: E402
+from parte2 import representacoes_intermedias as ir  # noqa: E402
+from parte2 import transformacoes as T  # noqa: E402
 import studylang  # noqa: E402
 
 EX = ROOT / "exemplos"
@@ -249,7 +249,7 @@ class TestPropriedades(unittest.TestCase):
             self.assertLessEqual(analise.ag_min_hours(P), h, s)
 
     def test_ag_l_atribuida_nos_aleatorios(self):
-        import grafos
+        from parte2 import visualizacao as grafos
         for s in RANDOM[:40]:
             g, root = grafos.ag_instance(cs.parser.parse(s))
             self.assertEqual(grafos.check_l_attributed(g), [])

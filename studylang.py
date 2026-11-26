@@ -9,13 +9,18 @@ studylang: ferramenta de linha de comandos para a StudyLang.
     python studylang.py exportar   FICHEIRO [--formato md|csv|json]
     python studylang.py relatorio  FICHEIRO [-o PASTA]     página HTML com tudo (para demonstração)
 
+    python studylang.py exemplos       verificador da Parte I sobre os exemplos
+    python studylang.py metricas       métricas da gramática (NB07)
+    python studylang.py grafos-todos   todos os grafos (gramática, AG, exemplos) em resultados/grafos/
+
 Arquitetura (cada componente usa o anterior):
-    studylang.lark + check_studylang.py   front-end: parser LALR(1) e gramática de atributos
-    ir.py                                 representações intermédias: nomes, CFG, DFG, PDG
-    analise.py                            análise estática: intervalos, avaliação exata, diagnósticos
-    transformacoes.py                     pretty-printer, otimização, planificação, exportação
-    grafos.py                             visualização (DOT e HTML)
-    studylang.py                          esta interface
+    parte1/gramatica.lark                   gramática LALR(1)
+    parte1/verificador.py                   parser + gramática de atributos (P1-P11)
+    parte2/representacoes_intermedias.py    nomes, CFG, blocos básicos, DFG, PDG, fatias
+    parte2/analise_estatica.py              intervalos, avaliação exata, diagnósticos
+    parte2/transformacoes.py                pretty-printer, otimização, planificação, exportação
+    parte2/visualizacao.py                  desenho dos grafos (DOT e HTML)
+    studylang.py                            esta interface
 """
 import argparse
 import html
@@ -25,15 +30,17 @@ from pathlib import Path
 
 from lark.exceptions import UnexpectedCharacters, UnexpectedInput, UnexpectedToken
 
-import analise
-import grafos
-import ir
-import transformacoes as T
+from parte2 import analise_estatica as analise
+from parte2 import representacoes_intermedias as ir
+from parte2 import transformacoes as T
+from parte2 import visualizacao as grafos
 
 try:
     sys.stdout.reconfigure(encoding="utf-8")
 except Exception:
     pass
+
+RESULTADOS = Path(__file__).resolve().parent / "resultados"
 
 LEVEL_MARK = {"erro": "✖", "aviso": "⚠", "info": "ℹ"}
 
@@ -133,7 +140,7 @@ def cmd_grafos(a):
     if not P.valid:
         print("o programa tem erros semânticos; corrija-os primeiro (python studylang.py verificar)")
         return 1
-    out = Path(a.o or f"grafos_{P.name}")
+    out = Path(a.o or RESULTADOS / "grafos" / P.name)
     grafos.GRAPHS.clear()
     grafos.program_graphs(P, analise.analyse(P), P.name)
     rendered = grafos.write_graphs(out, grafos.GRAPHS)
@@ -184,7 +191,7 @@ def cmd_exportar(a):
 
 def cmd_relatorio(a):
     P = load(a.ficheiro)
-    out = Path(a.o or f"relatorio_{P.name}")
+    out = Path(a.o or RESULTADOS / "relatorios" / P.name)
     out.mkdir(parents=True, exist_ok=True)
     e = html.escape
     parts = [f"<h2>Programa</h2><p><b>{e(P.student)}</b> ({P.level}), {len(P.ucs)} UC(s), "
@@ -237,6 +244,24 @@ def _md_table_html(md):
     return "".join(out)
 
 
+def cmd_exemplos(a):
+    from parte1 import verificador
+    verificador.main()
+    return 0
+
+
+def cmd_metricas(a):
+    import runpy
+    runpy.run_module("parte1.metricas_gramatica", run_name="__main__")
+    return 0
+
+
+def cmd_grafos_todos(a):
+    grafos.GRAPHS.clear()
+    grafos.main()
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="studylang", description="Ferramentas para a linguagem StudyLang.")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -264,9 +289,12 @@ def main(argv=None):
     s = sub.add_parser("relatorio", help="página HTML com análise, transformações e grafos")
     s.add_argument("ficheiro")
     s.add_argument("-o", help="pasta de saída")
+    sub.add_parser("exemplos", help="verificador da Parte I sobre os exemplos")
+    sub.add_parser("metricas", help="métricas da gramática (NB07)")
+    sub.add_parser("grafos-todos", help="todos os grafos em resultados/grafos/")
     a = ap.parse_args(argv)
     try:
-        return globals()[f"cmd_{a.cmd}"](a)
+        return globals()[f"cmd_{a.cmd.replace('-', '_')}"](a)
     except SyntaxProblem as e:
         print(f"{a.ficheiro}: {e}")
         return 1
